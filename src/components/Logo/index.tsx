@@ -3,9 +3,8 @@ import "./style.scss";
 export const Logo = () => {
   return (
     <div className="logo">
-      
       <span className="logo-name">
-        GO<span>RIDE</span>
+        LoGisTics<span>Company</span>
       </span>
     </div>
   );

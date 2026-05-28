@@ -3,9 +3,8 @@
 
 .app-sidebar {
   position: fixed;
-  top: 72px;
   left: 0;
-  height: calc(100vh - 72px);
+  height: 100vh;
   width: $sidebar-width;
   background: $sidebar-bg;
   border-right: 1px solid $border-color;

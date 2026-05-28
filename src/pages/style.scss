@@ -28,17 +28,17 @@
 }
 
 .app-layout__main {
-  margin-top: 72px; // header height
   flex: 1;
   min-width: 0;
-  min-height: calc(100vh - 72px - 72px);
+  min-height: calc(100vh - 66px - 66px);
   overflow: hidden;
   position: relative;
-  background-color: $primary-navy;
+  background-color: $text-white;
+  padding: 24px 48px;
 }
 
 .app-footer {
-  min-height: 72px;
+  min-height: 66px;
   padding: 18px 24px;
   background-color: rgba(255, 255, 255, 0.04);
   border-top: 1px solid rgba(255, 255, 255, 0.08);

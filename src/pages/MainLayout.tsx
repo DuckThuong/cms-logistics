@@ -4,9 +4,8 @@ import {
   isPathAllowedForRole,
   MENU_PATHS,
 } from "@/common/constants/menu.contant";
-import AppSidebar from "@/components/SideBar";
 import Footer from "@/components/Footer";
-import Header from "@/components/Header/Header";
+import AppSidebar from "@/components/SideBar";
 import { ROUTER_PATH } from "@/routers/Route";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -47,7 +46,6 @@ export const MainLayout = () => {
   }
   return (
     <div className="app-layout">
-      <Header />
       <AppSidebar
         collapsed={collapsed}
         onToggle={handleToggle}
