@@ -1,8 +1,7 @@
-import { BellOutlined, UserOutlined } from "@ant-design/icons";
-import { Badge } from "antd";
-import { Logo } from "@/components/Logo";
 import { useUser } from "@/common/contexts/UserContext";
 import { ROUTER_PATH } from "@/routers/Route";
+import { BellOutlined, UserOutlined } from "@ant-design/icons";
+import { Badge } from "antd";
 import "./Header.scss";
 
 const Header = () => {
