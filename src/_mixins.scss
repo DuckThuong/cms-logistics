@@ -1,0 +1,136 @@
+@use 'variables' as *;
+
+@mixin xs {
+  @media (max-width: #{$breakpoint-xs}) { @content; }
+}
+@mixin sm {
+  @media (max-width: #{$breakpoint-sm}) { @content; }
+}
+@mixin md {
+  @media (max-width: #{$breakpoint-md}) { @content; }
+}
+@mixin lg {
+  @media (max-width: #{$breakpoint-lg}) { @content; }
+}
+@mixin xl {
+  @media (max-width: #{$breakpoint-xl}) { @content; }
+}
+
+@mixin container {
+  max-width: $container-max;
+  margin: 0 auto;
+  padding: 0 $container-padding;
+  width: 100%;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin section-padding {
+  padding: $spacing-5xl 0;
+
+  @include lg {
+    padding: $spacing-4xl 0;
+  }
+
+  @include md {
+    padding: $spacing-3xl 0;
+  }
+}
+
+// ===========================
+// TYPOGRAPHY MIXINS
+// ===========================
+@mixin section-title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-extrabold;
+  line-height: 1.2;
+  color: $text-primary;
+  font-family: $font-display;
+
+  @include lg {
+    font-size: $font-size-2xl;
+  }
+
+  @include md {
+    font-size: $font-size-xl;
+  }
+}
+
+@mixin section-subtitle {
+  font-size: $font-size-md;
+  color: $text-secondary;
+  line-height: 1.7;
+  font-weight: $font-weight-regular;
+}
+
+@mixin gradient-text {
+  background: $primary-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ===========================
+// EFFECTS MIXINS
+// ===========================
+@mixin card-hover {
+  transition: $transition-base;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@mixin glass-effect {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@mixin overlay-dark($opacity: 0.6) {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 13, 26, $opacity);
+    z-index: 1;
+  }
+}
+
+@mixin primary-btn {
+  background: $primary-gradient;
+  color: $text-white;
+  border: none;
+  font-weight: $font-weight-semibold;
+  box-shadow: $shadow-primary;
+  transition: $transition-base;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba($primary, 0.45);
+    background: $primary-gradient;
+    color: $text-white;
+  }
+}
+
+@mixin tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 6px 16px;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.5px;
+}

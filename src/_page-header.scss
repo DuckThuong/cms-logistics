@@ -1,0 +1,79 @@
+@use 'variables' as *;
+
+@mixin page-hero-header($block) {
+  .#{$block}__header {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, $bg-dark 0%, #16213e 100%);
+    padding-top: $header-height !important;
+    padding-bottom: $spacing-2xl !important;
+    margin-bottom: $spacing-2xl;
+  }
+
+  .#{$block}__header-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 70% 60% at 80% 0%, rgba($primary, 0.25) 0%, transparent 60%),
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: auto, 48px 48px, 48px 48px;
+    pointer-events: none;
+  }
+
+  .#{$block}__header-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .#{$block}__breadcrumb {
+    margin-bottom: $spacing-lg;
+
+    .ant-breadcrumb-link,
+    .ant-breadcrumb-separator {
+      color: rgba($text-white, 0.6) !important;
+
+      a {
+        color: rgba($text-white, 0.6) !important;
+
+        &:hover {
+          color: $primary !important;
+        }
+      }
+    }
+
+    .ant-breadcrumb-link:last-child {
+      color: rgba($text-white, 0.9) !important;
+    }
+  }
+
+  .#{$block}__badge {
+    margin-bottom: $spacing-md !important;
+    border: 1px solid rgba($primary, 0.35) !important;
+    background: rgba($primary, 0.12) !important;
+    color: $primary-soft !important;
+    border-radius: $radius-full !important;
+    padding: 4px 14px !important;
+    font-size: $font-size-sm !important;
+  }
+
+  .#{$block}__title {
+    font-size: clamp(28px, 4vw, $font-size-3xl);
+    font-weight: $font-weight-extrabold;
+    color: $text-white;
+    margin: 0 0 $spacing-md;
+    letter-spacing: -0.5px;
+
+    @media (max-width: $breakpoint-md) {
+      font-size: $font-size-xl;
+    }
+  }
+
+  .#{$block}__subtitle {
+    max-width: 640px;
+    margin: 0;
+    font-size: $font-size-base;
+    line-height: 1.7;
+    color: rgba($text-white, 0.72);
+  }
+}

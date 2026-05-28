@@ -1,0 +1,95 @@
+$font_family_1: "DM Sans", "system-ui", sans-serif;
+
+$text_color_1: #00293a;
+$text_color_2: #f0f2f5;
+$text_color_3: #147ba7;
+$text_color_4: #015e86a1;
+
+$black_color: #00293a;
+$white_color: #ffffff;
+$primary_color: #00293a;
+$secondary_color: #00609c;
+
+$text_alert_1: #e52500;
+$text_alert_2: #007bff;
+
+$color-text-primary: #333333;
+$color-border: #d9d9d9;
+$color-blue-5: #1890ff;
+$color-blue-4: #40a9ff;
+$color-blue-6: #096dd9;
+$color-red-5: #ff4d4f;
+$color-orange-5: #faad14;
+$color-gray-2: #f5f5f5;
+$color-gray-6: #bfbfbf;
+$color-white: #ffffff;
+
+$shadow-focus-blue: rgba(24, 144, 255, 0.2);
+$shadow-error-red: rgba(255, 77, 79, 0.2);
+$shadow-warning-orange: rgba(250, 173, 20, 0.2);
+
+$background-color: #f7f8f9;
+$background-color-1: #6ba7e44b;
+
+// Colors - Primary Palette
+$primary-dark: #0b1426;
+$primary-navy: #101d38;
+$primary-navy-2: #152045;
+$sidebar-bg: #0d1b35;
+$sidebar-hover: #1a2d52;
+$sidebar-active: #1e3460;
+
+// Accent
+$accent-orange: #f97316;
+$accent-orange-2: #fb923c;
+$accent-orange-light: rgba(249, 115, 22, 0.12);
+$accent-glow: rgba(249, 115, 22, 0.25);
+
+// Text
+$text-primary: #f1f5f9;
+$text-secondary: #94a3b8;
+$text-muted: #64748b;
+$text-white: #ffffff;
+
+// Status Colors
+$status-success: #22c55e;
+$status-warning: #eab308;
+$status-error: #ef4444;
+$status-info: #3b82f6;
+
+// Border
+$border-color: rgba(255, 255, 255, 0.06);
+$border-active: rgba(249, 115, 22, 0.4);
+
+// Header
+$header-bg: #0f1e38;
+$header-height: 64px;
+
+// Sidebar
+$sidebar-width: 240px;
+$sidebar-collapsed-width: 72px;
+
+// Shadow
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+$shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+$shadow-orange: 0 0 20px rgba(249, 115, 22, 0.15);
+
+// Border radius
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+
+// Transitions
+$transition-fast: all 0.18s ease;
+$transition-base: all 0.25s ease;
+$transition-slow: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Z-index
+$z-sidebar: 100;
+$z-header: 200;
+$z-overlay: 150;
+$z-dropdown: 300;
+
+$font-primary: "Be Vietnam Pro", "Segoe UI", sans-serif;
+$font-mono: "JetBrains Mono", monospace;

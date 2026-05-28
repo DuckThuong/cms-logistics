@@ -1,0 +1,22 @@
+@use "../../variables" as *;
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 36px;
+  opacity: 0;
+  animation: fadeUp 0.5s 0.4s ease forwards;
+
+  .logo-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    background-color: $bg-dark;
+
+    span {
+      color: $bg-dark;
+    }
+  }
+}

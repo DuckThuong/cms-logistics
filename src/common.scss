@@ -1,0 +1,231 @@
+@use "./color" as *;
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap");
+
+$night: #0a0e1a;
+$night-2: #151b2e;
+$navy: #0f1629;
+
+$amber: #f5a623;
+$amber-light: #fdc96a;
+$amber-pale: #fff8ec;
+
+$muted: #6b7280;
+$muted-on-dark: rgba(255, 255, 255, 0.55);
+
+$border: #e5e7eb;
+$bg: #f4f5f7;
+$white: #ffffff;
+
+$green: #16a34a;
+$green-bright: #22c55e;
+$green-pale: #f0fdf4;
+$red: #ef4444;
+
+$radius-sm: 10px;
+$radius-md: 16px;
+$radius-lg: 24px;
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp18 {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp20 {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@mixin fadeUp($delay: 0s) {
+  opacity: 0;
+  animation: fadeUp 0.5s #{$delay} ease forwards;
+}
+
+@mixin fadeUp18($delay: 0s) {
+  opacity: 0;
+  animation: fadeUp18 0.5s #{$delay} ease forwards;
+}
+
+@mixin fadeUp20($delay: 0s) {
+  opacity: 0;
+  animation: fadeUp20 0.5s #{$delay} ease forwards;
+}
+
+@mixin fadeUpSecond($delay: 0s) {
+  opacity: 0;
+  animation: fadeUp20 0.5s #{$delay} ease forwards;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes float8 {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes blobFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -20px) scale(1.04);
+  }
+}
+
+@keyframes dashMove {
+  to {
+    stroke-dashoffset: -60;
+  }
+}
+
+@keyframes carDrive {
+  0% {
+    transform: translateY(600px);
+  }
+  100% {
+    transform: translateY(-30px);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ringPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  60% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes drawCheck {
+  from {
+    stroke-dashoffset: 60;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: $font-primary;
+  background-color: $primary-dark;
+  color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+}
+
+// Scrollbar
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: $primary-navy;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 99px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+// Ant Design overrides
+.ant-layout {
+  background: transparent !important;
+}
+
+.ant-badge-count {
+  font-family: $font-primary !important;
+}

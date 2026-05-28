@@ -1,0 +1,29 @@
+@use "../../color.scss" as *;
+
+.app-footer {
+  min-height: 72px;
+  padding: 18px 24px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.app-footer__links {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.app-footer__links a {
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 0.25s ease;
+}
+
+.app-footer__links a:hover {
+  color: #ffffff;
+}
