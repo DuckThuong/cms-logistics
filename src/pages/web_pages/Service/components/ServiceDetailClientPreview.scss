@@ -1,0 +1,42 @@
+.svc-client-preview--detail {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e8eaf0;
+
+  .svc-client-preview__hero--compact {
+    padding: 28px 24px 32px;
+  }
+
+  .svc-client-preview__article {
+    padding: 24px 32px 40px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .svc-client-preview__article-section {
+    margin-bottom: 28px;
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+  }
+
+  .svc-client-preview__html {
+    color: #475569;
+    line-height: 1.7;
+    margin-bottom: 12px;
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    ul {
+      margin: 0 0 12px;
+      padding-left: 20px;
+    }
+  }
+}

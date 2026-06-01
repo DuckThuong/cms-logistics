@@ -37,9 +37,15 @@ export const MainLayout = () => {
   const handleMenuSelect = (key: string) => {
     setActiveKey(key);
     const path = MENU_PATHS[key];
-    if (path) {
-      navigate(path);
+    if (!path) {
+      return;
     }
+    // Menu "Dịch vụ" luôn mở màn danh sách, không giữ màn detail
+    if (key === "service") {
+      navigate(ROUTER_PATH.SERVICE);
+      return;
+    }
+    navigate(path);
   };
 
   if (!isCurrentPathAllowed) {
