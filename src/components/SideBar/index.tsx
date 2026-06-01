@@ -1,7 +1,6 @@
 import { Tooltip } from "antd";
 import React from "react";
 import { LeftOutlined, LogoutOutlined, RightOutlined } from "@ant-design/icons";
-import { Logo } from "../Logo";
 import type {
   AppSidebarProps,
   CollapseToggleProps,
@@ -10,35 +9,44 @@ import type {
 } from "@/common/types/common";
 import "./style.scss";
 
+// ─── Logo ─────────────────────────────────────────────────────────────────────
+
 const SidebarLogo = ({ collapsed }: { collapsed: boolean }) => (
   <div className="app-sidebar__logo">
     <a className="sidebar-logo" href="/">
-      <div className="logo-icon">
-        <svg viewBox="0 0 20 20" fill="none">
-          <path d="M3 14l2-5h10l2 5H3z" fill="#f5a623" />
-          <rect x="5" y="14" width="3" height="3" rx="1.5" fill="#f5a623" />
-          <rect x="12" y="14" width="3" height="3" rx="1.5" fill="#f5a623" />
+      <div className="sidebar-logo__icon">
+        <svg viewBox="0 0 24 24" fill="none">
           <path
-            d="M7 9l1-3h4l1 3"
-            stroke="#fff"
-            strokeWidth="1"
+            d="M2 16l3-8h14l3 8H2z"
+            fill="currentColor"
+            opacity="0.9"
+          />
+          <rect x="5" y="16" width="4" height="4" rx="2" fill="currentColor" opacity="0.75" />
+          <rect x="15" y="16" width="4" height="4" rx="2" fill="currentColor" opacity="0.75" />
+          <path
+            d="M9 11l1.5-4h3L15 11"
+            stroke="white"
+            strokeWidth="1.2"
             strokeLinecap="round"
             fill="none"
+            opacity="0.5"
           />
         </svg>
       </div>
+
       {!collapsed && (
-        <div className="sidebar-logo__text-container">
-          <div className="sidebar-logo__text">
-            <Logo /> <span className="sidebar-logo__text-separator">|</span>
-            <span>CMS System</span>
-            <span className="sidebar-logo__badge">v2.5</span>
-          </div>
+        <div className="sidebar-logo__content">
+          <span className="sidebar-logo__name">LogiCMS</span>
+          <span className="sidebar-logo__sub">Logistics Platform</span>
         </div>
       )}
+
+      {!collapsed && <span className="sidebar-logo__badge">v2.5</span>}
     </a>
   </div>
 );
+
+// ─── Menu Item ────────────────────────────────────────────────────────────────
 
 const MenuItem = ({ item, isActive, collapsed, onClick }: MenuItemProps) => {
   const content = (
@@ -51,9 +59,7 @@ const MenuItem = ({ item, isActive, collapsed, onClick }: MenuItemProps) => {
         <>
           <span className="menu-item__label">{item.label}</span>
           {item.badge && (
-            <span
-              className={`menu-item__badge menu-item__badge--${item.badge.type}`}
-            >
+            <span className={`menu-item__badge menu-item__badge--${item.badge.type}`}>
               {item.badge.text}
             </span>
           )}
@@ -64,7 +70,7 @@ const MenuItem = ({ item, isActive, collapsed, onClick }: MenuItemProps) => {
 
   if (collapsed) {
     return (
-      <Tooltip title={item.label} placement="right" mouseEnterDelay={0.1}>
+      <Tooltip title={item.label} placement="right" mouseEnterDelay={0.05}>
         {content}
       </Tooltip>
     );
@@ -73,12 +79,9 @@ const MenuItem = ({ item, isActive, collapsed, onClick }: MenuItemProps) => {
   return content;
 };
 
-const MenuGroup = ({
-  group,
-  activeKey,
-  collapsed,
-  onSelect,
-}: MenuGroupProps) => (
+// ─── Menu Group ───────────────────────────────────────────────────────────────
+
+const MenuGroup = ({ group, activeKey, collapsed, onSelect }: MenuGroupProps) => (
   <div className="sidebar-menu__group">
     {!collapsed && (
       <div className="sidebar-menu__group-label">{group.label}</div>
@@ -95,18 +98,20 @@ const MenuGroup = ({
   </div>
 );
 
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
 const SidebarFooter = ({ collapsed }: { collapsed: boolean }) => (
   <div className="sidebar-footer">
     <div className="sidebar-footer__avatar">AD</div>
     {!collapsed && (
       <div className="sidebar-footer__info">
-        <div className="sidebar-footer__info-name">Admin Hệ thống</div>
-        <div className="sidebar-footer__info-role">Super Administrator</div>
+        <div className="sidebar-footer__name">Admin Hệ thống</div>
+        <div className="sidebar-footer__role">Super Administrator</div>
       </div>
     )}
     {!collapsed && (
       <Tooltip title="Đăng xuất" placement="top">
-        <div className="sidebar-footer__action">
+        <div className="sidebar-footer__logout">
           <LogoutOutlined />
         </div>
       </Tooltip>
@@ -114,16 +119,22 @@ const SidebarFooter = ({ collapsed }: { collapsed: boolean }) => (
   </div>
 );
 
+// ─── Collapse Toggle ──────────────────────────────────────────────────────────
+
 const CollapseToggle = ({ collapsed, onToggle }: CollapseToggleProps) => (
   <Tooltip title={collapsed ? "Mở rộng" : "Thu gọn"} placement="right">
-    <div
+    <button
+      type="button"
       className={`sidebar-toggle ${collapsed ? "collapsed" : ""}`}
       onClick={onToggle}
+      aria-label={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
     >
       {collapsed ? <RightOutlined /> : <LeftOutlined />}
-    </div>
+    </button>
   </Tooltip>
 );
+
+// ─── AppSidebar ───────────────────────────────────────────────────────────────
 
 const AppSidebar = ({
   collapsed,
@@ -131,29 +142,30 @@ const AppSidebar = ({
   activeKey,
   menuGroups,
   onMenuSelect,
-}: AppSidebarProps) => {
-  return (
-    <>
-      <div className={`app-sidebar ${collapsed ? "collapsed" : ""}`}>
-        <SidebarLogo collapsed={collapsed} />
-        <div className="sidebar-menu">
-          {menuGroups.map((group, idx) => (
-            <React.Fragment key={group.label}>
-              {idx > 0 && <div className="sidebar-menu__divider" />}
-              <MenuGroup
-                group={group}
-                activeKey={activeKey}
-                collapsed={collapsed}
-                onSelect={onMenuSelect}
-              />
-            </React.Fragment>
-          ))}
-        </div>
-        <SidebarFooter collapsed={collapsed} />
-      </div>
-      <CollapseToggle collapsed={collapsed} onToggle={onToggle} />
-    </>
-  );
-};
+}: AppSidebarProps) => (
+  <>
+    <aside className={`app-sidebar ${collapsed ? "collapsed" : ""}`}>
+      <SidebarLogo collapsed={collapsed} />
+
+      <nav className="sidebar-menu">
+        {menuGroups.map((group, idx) => (
+          <React.Fragment key={group.label}>
+            {idx > 0 && <div className="sidebar-menu__divider" />}
+            <MenuGroup
+              group={group}
+              activeKey={activeKey}
+              collapsed={collapsed}
+              onSelect={onMenuSelect}
+            />
+          </React.Fragment>
+        ))}
+      </nav>
+
+      <SidebarFooter collapsed={collapsed} />
+    </aside>
+
+    <CollapseToggle collapsed={collapsed} onToggle={onToggle} />
+  </>
+);
 
 export default AppSidebar;

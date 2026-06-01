@@ -6,6 +6,7 @@ export const ROUTER_NAME = {
   MAIN_PAGE: "main-page",
   NOT_FOUND: "*",
   DASHBOARD: "dashboard",
+  COMPANY_INFORMATION: "company-information",
 
   // Following routes are placeholders (some pages are not implemented yet).
   ABOUT_PAGE: "about",
@@ -32,6 +33,7 @@ export const ROUTER_PATH = {
   MAIN_PAGE: `${ROUTER}/${ROUTER_NAME.MAIN_PAGE}`,
   NOT_FOUND: `${ROUTER}/${ROUTER_NAME.NOT_FOUND}`,
   DASHBOARD: `${ROUTER}/${ROUTER_NAME.DASHBOARD}`,
+  COMPANY_INFORMATION: `${ROUTER}/${ROUTER_NAME.DASHBOARD}/${ROUTER_NAME.COMPANY_INFORMATION}`,
 
   ABOUT_PAGE: `${ROUTER}/${ROUTER_NAME.ABOUT_PAGE}`,
   SERVICE: `${ROUTER}/${ROUTER_NAME.SERVICE}`,

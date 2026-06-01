@@ -1,11 +1,47 @@
-@use "../../color.scss" as *;
-@use "../../common.scss" as *;
+// ─── Sidebar Variables ────────────────────────────────────────────────────────
+// Overrides color.scss with logistics orange palette
+
+$lo:            #ff6a00;
+$lo-dark:       #e55d00;
+$lo-light:      #ff8533;
+$lo-soft:       #ffb380;
+$lo-bg:         rgba(255, 106, 0, 0.10);
+$lo-border:     rgba(255, 106, 0, 0.28);
+$lo-glow:       rgba(255, 106, 0, 0.20);
+
+$navy:          #1a1a2e;
+$navy-2:        #16213e;
+$navy-3:        #0f1629;
+
+$sidebar-bg:         #12111f;
+$sidebar-hover:      rgba(255, 255, 255, 0.04);
+$sidebar-active:     rgba(255, 106, 0, 0.10);
+$sidebar-width:      240px;
+$sidebar-collapsed:  72px;
+
+$text-white:    #f1f5f9;
+$text-secondary: #94a3b8;
+$text-muted:    #64748b;
+$border-color:  rgba(255, 255, 255, 0.06);
+$border-active: rgba(255, 106, 0, 0.35);
+
+$radius-sm:  6px;
+$radius-md:  10px;
+$radius-lg:  14px;
+$header-height: 64px;
+$z-sidebar: 100;
+
+$transition-fast: all 0.15s ease;
+$transition-base: all 0.25s ease;
+$transition-slow: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+// ─── Base ─────────────────────────────────────────────────────────────────────
 
 .app-sidebar {
   position: fixed;
-  top: 72px;
+  top: $header-height;
   left: 0;
-  height: calc(100vh - 72px);
+  height: calc(100vh - #{$header-height});
   width: $sidebar-width;
   background: $sidebar-bg;
   border-right: 1px solid $border-color;
@@ -13,54 +49,62 @@
   flex-direction: column;
   z-index: $z-sidebar;
   transition: $transition-slow;
+  overflow: hidden;
 
+  // Ambient glow background
   &::before {
     content: "";
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(
-        ellipse at 10% 20%,
-        rgba(249, 115, 22, 0.04) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        ellipse at 90% 80%,
-        rgba(59, 130, 246, 0.03) 0%,
-        transparent 50%
-      );
+      radial-gradient(ellipse at 10% 10%, rgba(255, 106, 0, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 90%, rgba(15, 52, 96, 0.05) 0%, transparent 55%);
     pointer-events: none;
+    z-index: 0;
   }
 
-  &.collapsed {
-    width: $sidebar-collapsed-width;
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
 
-    .sidebar-logo__text,
-    .sidebar-logo__badge,
-    .menu-label,
-    .sidebar-footer__info,
-    .menu-item__label,
-    .menu-item__badge {
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-    }
+  // ── Collapsed state ──────────────────────────────────────────────────────────
+  &.collapsed {
+    width: $sidebar-collapsed;
 
     .sidebar-logo {
       justify-content: center;
-      padding: 0 20px;
+      padding: 0;
+
+      &__content,
+      &__badge {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
     }
 
     .sidebar-menu__group-label {
-      opacity: 0;
       height: 0;
+      opacity: 0;
+      padding: 0;
       margin: 0;
       overflow: hidden;
     }
 
     .menu-item {
       justify-content: center;
-      padding: 0 20px;
+      padding: 0;
+      margin: 2px 8px;
+
+      &__label,
+      &__badge {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
 
       &__icon {
         margin-right: 0;
@@ -68,24 +112,32 @@
     }
 
     .sidebar-footer {
-      padding: 12px;
       justify-content: center;
+      padding: 12px 8px;
+
+      &__info,
+      &__logout {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
 
       &__avatar {
         margin-right: 0;
       }
     }
   }
+}
 
-  &__logo {
-    flex-shrink: 0;
-    height: $header-height;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    border-bottom: 1px solid $border-color;
-    position: relative;
-  }
+// ─── Logo ─────────────────────────────────────────────────────────────────────
+
+.app-sidebar__logo {
+  flex-shrink: 0;
+  height: $header-height;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid $border-color;
 }
 
 .sidebar-logo {
@@ -93,145 +145,145 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  transition: $transition-base;
   text-decoration: none;
+  transition: $transition-base;
 
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: $night;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    svg {
-      width: 18px;
-      height: 18px;
-    }
-  }
-
+  // Truck icon box
   &__icon {
     flex-shrink: 0;
     width: 36px;
     height: 36px;
+    background: linear-gradient(135deg, $lo 0%, $lo-light 100%);
     border-radius: $radius-md;
-    background: linear-gradient(135deg, $accent-orange, #ea580c);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: $shadow-orange;
-    font-size: 18px;
+    color: white;
     transition: $transition-base;
 
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
     &:hover {
-      box-shadow: 0 0 28px rgba(249, 115, 22, 0.4);
-      transform: scale(1.05);
+      box-shadow: 0 0 20px $lo-glow;
     }
   }
 
-  &__text {
-    transition: $transition-base;
-    white-space: nowrap;
+  &__content {
+    flex: 1;
     overflow: hidden;
+    white-space: nowrap;
+    transition: $transition-slow;
+    min-width: 0;
+  }
 
-    .logo {
-      margin-bottom: 0px !important;
-    }
+  &__name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-white;
+    line-height: 1.3;
+    letter-spacing: -0.2px;
+  }
 
-    h2 {
-      font-size: 15px;
-      font-weight: 700;
-      color: $text-white;
-      line-height: 1.2;
-      letter-spacing: -0.3px;
-    }
-
-    span {
-      font-size: 10px;
-      font-weight: 500;
-      color: $text-muted;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-    }
+  &__sub {
+    display: block;
+    font-size: 10px;
+    color: $text-muted;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
   }
 
   &__badge {
-    margin-left: auto;
-    background: $accent-orange-light;
-    border: 1px solid rgba(249, 115, 22, 0.3);
-    color: $accent-orange-2;
+    flex-shrink: 0;
+    background: $lo-bg;
+    border: 1px solid $lo-border;
+    color: $lo-soft;
     font-size: 9px;
-    font-weight: 700;
-    padding: 2px 7px;
+    font-weight: 600;
+    padding: 2px 8px;
     border-radius: 99px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     white-space: nowrap;
-    overflow: hidden;
-    transition: $transition-base;
+    transition: $transition-slow;
   }
 }
 
+// ─── Menu ─────────────────────────────────────────────────────────────────────
+
 .sidebar-menu {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 8px 0;
 
-  &__group {
-    margin-bottom: 4px;
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
 
-    &:not(:last-child) {
-      margin-bottom: 8px;
-    }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 99px;
+  }
+
+  &__group {
+    margin-bottom: 2px;
   }
 
   &__group-label {
     font-size: 9.5px;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-muted;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    padding: 8px 20px 4px;
-    transition: $transition-base;
+    padding: 10px 18px 4px;
     white-space: nowrap;
     overflow: hidden;
+    transition: $transition-slow;
   }
 
   &__divider {
     height: 1px;
     background: $border-color;
-    margin: 4px 16px;
+    margin: 6px 14px;
   }
 }
+
+// ─── Menu Item ────────────────────────────────────────────────────────────────
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  height: 42px;
+  padding: 0 10px;
+  height: 40px;
   border-radius: $radius-md;
   margin: 2px 8px;
   cursor: pointer;
   transition: $transition-fast;
   position: relative;
-  text-decoration: none;
   color: $text-secondary;
   gap: 0;
+  -webkit-user-select: none;
+  user-select: none;
 
   &:hover {
     background: $sidebar-hover;
-    color: $text-primary;
+    color: $text-white;
 
     .menu-item__icon {
-      color: $accent-orange-2;
+      color: $lo-light;
     }
   }
 
+  // Active state
   &.active {
     background: $sidebar-active;
     color: $text-white;
 
+    // Left accent bar
     &::before {
       content: "";
       position: absolute;
@@ -240,68 +292,81 @@
       transform: translateY(-50%);
       width: 3px;
       height: 20px;
-      background: $accent-orange;
+      background: $lo;
       border-radius: 0 3px 3px 0;
     }
 
     .menu-item__icon {
-      color: $accent-orange;
+      color: $lo;
     }
   }
 
+  // Icon container
   &__icon {
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
+    font-size: 16px;
     transition: $transition-fast;
     border-radius: $radius-sm;
   }
 
+  // Label
   &__label {
     font-size: 13.5px;
-    font-weight: 500;
+    font-weight: 400;
     white-space: nowrap;
     overflow: hidden;
-    transition: $transition-base;
+    transition: $transition-slow;
     flex: 1;
   }
 
+  // Badge
   &__badge {
     flex-shrink: 0;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     padding: 1px 7px;
     border-radius: 99px;
-    transition: $transition-base;
     white-space: nowrap;
     overflow: hidden;
+    transition: $transition-slow;
 
     &--orange {
-      background: $accent-orange-light;
-      color: $accent-orange-2;
-      border: 1px solid rgba(249, 115, 22, 0.25);
+      background: $lo-bg;
+      color: $lo-soft;
+      border: 1px solid $lo-border;
     }
+
     &--green {
-      background: rgba(34, 197, 94, 0.12);
+      background: rgba(34, 197, 94, 0.10);
       color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.25);
+      border: 1px solid rgba(34, 197, 94, 0.22);
     }
+
     &--blue {
-      background: rgba(59, 130, 246, 0.12);
+      background: rgba(59, 130, 246, 0.10);
       color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.22);
+    }
+
+    &--red {
+      background: rgba(239, 68, 68, 0.10);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.22);
     }
   }
 }
 
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
 .sidebar-footer {
   flex-shrink: 0;
   border-top: 1px solid $border-color;
-  padding: 14px 12px;
+  padding: 12px 10px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -310,58 +375,63 @@
 
   &:hover {
     background: $sidebar-hover;
+
+    .sidebar-footer__logout {
+      color: $lo;
+    }
   }
 
   &__avatar {
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    background: linear-gradient(135deg, #0f3460 0%, #1e5fa0 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     color: white;
-    border: 2px solid rgba(59, 130, 246, 0.4);
+    border: 2px solid rgba(59, 130, 246, 0.35);
     transition: $transition-fast;
   }
 
   &__info {
     flex: 1;
     overflow: hidden;
-    transition: $transition-base;
-
-    &-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: $text-primary;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    &-role {
-      font-size: 11px;
-      color: $text-muted;
-      white-space: nowrap;
-    }
+    transition: $transition-slow;
+    min-width: 0;
   }
 
-  &__action {
-    flex-shrink: 0;
-    color: $text-muted;
-    font-size: 14px;
-    transition: $transition-base;
+  &__name {
+    font-size: 13px;
+    font-weight: 500;
+    color: $text-white;
     white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  &:hover &__action {
-    color: $accent-orange;
+  &__role {
+    font-size: 11px;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  &__logout {
+    flex-shrink: 0;
+    color: $text-muted;
+    font-size: 15px;
+    transition: $transition-base;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
+
+// ─── Collapse Toggle ──────────────────────────────────────────────────────────
 
 .sidebar-toggle {
   position: fixed;
@@ -370,8 +440,8 @@
   transform: translateX(-50%) translateY(-50%);
   width: 22px;
   height: 22px;
-  background: $primary-navy-2;
-  border: 1px solid $border-color;
+  background: #1e1d30;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -380,105 +450,96 @@
   z-index: $z-sidebar + 1;
   transition: $transition-slow;
   color: $text-secondary;
-  font-size: 11px;
+  font-size: 10px;
+  padding: 0;
+  outline: none;
 
   &:hover {
-    background: $accent-orange;
-    border-color: $accent-orange;
+    background: $lo;
+    border-color: $lo;
     color: white;
-    box-shadow: $shadow-orange;
+    box-shadow: 0 0 16px $lo-glow;
   }
 
   &.collapsed {
-    left: $sidebar-collapsed-width;
+    left: $sidebar-collapsed;
   }
 }
 
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
 @media (max-width: 1199px) {
   .app-sidebar {
-    width: $sidebar-collapsed-width;
-
-    .sidebar-logo__text,
-    .sidebar-logo__badge,
-    .sidebar-footer__info,
-    .menu-item__label,
-    .menu-item__badge,
-    .sidebar-menu__group-label {
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-    }
+    width: $sidebar-collapsed;
 
     .sidebar-logo {
       justify-content: center;
-      padding: 0 12px;
-    }
 
-    .menu-item {
-      justify-content: center;
-      padding: 0 12px;
-
-      &__icon {
-        margin-right: 0;
-      }
-    }
-
-    .sidebar-footer {
-      justify-content: center;
-      padding: 12px;
-
-      &__avatar {
-        margin-right: 0;
+      &__content,
+      &__badge {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
       }
     }
 
     .sidebar-menu__group-label {
       height: 0;
-      margin: 0;
-      padding-top: 0;
-      padding-bottom: 0;
+      opacity: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .menu-item {
+      justify-content: center;
+      padding: 0;
+
+      &__label,
+      &__badge {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
+    }
+
+    .sidebar-footer {
+      justify-content: center;
+      padding: 12px 8px;
+
+      &__info,
+      &__logout {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
     }
   }
 
   .sidebar-toggle {
-    left: $sidebar-collapsed-width;
+    left: $sidebar-collapsed;
   }
 }
 
 @media (max-width: 767px) {
   .app-sidebar {
     width: 64px;
+  }
 
-    &__logo {
-      padding: 0 10px;
-    }
+  .sidebar-toggle {
+    left: 64px;
+    width: 20px;
+    height: 20px;
   }
 
   .menu-item {
     margin: 2px 6px;
-    height: 40px;
+    height: 38px;
 
     &__icon {
-      width: 32px;
-      min-width: 32px;
-      height: 32px;
-      font-size: 16px;
+      width: 30px;
+      min-width: 30px;
+      height: 30px;
+      font-size: 15px;
     }
-  }
-
-  .sidebar-menu__divider {
-    margin: 8px 10px;
-  }
-
-  .sidebar-footer__avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-  }
-
-  .sidebar-toggle {
-    width: 20px;
-    height: 20px;
-    left: 64px;
   }
 }

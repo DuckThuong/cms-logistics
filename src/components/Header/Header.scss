@@ -1,368 +1,312 @@
-@use '../../_variables' as *;
-@use '../../_mixins' as *;
+// ─── Logistics Header Variables ───────────────────────────────────────────────
+$lo:          #ff6a00;
+$lo-dark:     #e55d00;
+$lo-light:    #ff8533;
+$lo-soft:     #ffb380;
+$lo-bg:       rgba(255, 106, 0, 0.10);
+$lo-border:   rgba(255, 106, 0, 0.28);
+$lo-glow:     rgba(255, 106, 0, 0.18);
+
+$header-bg:        #0f0e1c;
+$header-border:    rgba(255, 255, 255, 0.06);
+$header-height:    64px;
+
+$text-white:       #f1f5f9;
+$text-secondary:   #94a3b8;
+$text-muted:       #64748b;
+$input-bg:         rgba(255, 255, 255, 0.04);
+$hover-bg:         rgba(255, 255, 255, 0.05);
+
+$radius-sm: 8px;
+$radius-md: 12px;
+
+$transition-fast: all 0.15s ease;
+$transition-base: all 0.25s ease;
+
+// ─── Header ───────────────────────────────────────────────────────────────────
 
 .hk-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 200;
   height: $header-height;
-  background: transparent;
-  transition: $transition-slow;
+  background: $header-bg;
+  border-bottom: 1px solid $header-border;
 
-  &--scrolled {
-    background: rgba(13, 13, 26, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+  // Subtle warm ambient glow top-left
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: radial-gradient(ellipse at 0% 50%, rgba(255, 106, 0, 0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  // Top accent line — 2px orange gradient
+  &__accent-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, $lo 0%, $lo-light 40%, transparent 100%);
+    z-index: 1;
   }
 
   &__inner {
-    @include flex-between;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
     height: 100%;
-    gap: $spacing-xl;
-  }
-
-  // --- Logo ---
-  &__logo {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    text-decoration: none;
-    flex-shrink: 0;
-  }
-
-  &__logo-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: $radius-sm;
-    background: $primary-gradient;
-    @include flex-center;
-    color: white;
-
-    .ti {
-      font-size: 22px;
-    }
-  }
-
-  &__logo-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-  }
-
-  &__logo-name {
-    font-size: $font-size-base;
-    font-weight: $font-weight-bold;
-    color: $text-white;
-    letter-spacing: -0.3px;
-  }
-
-  &__logo-sub {
-    font-size: $font-size-xs;
-    color: $text-white-60;
-    font-weight: $font-weight-medium;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-  }
-
-  // --- Desktop Nav ---
-  &__nav {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    flex: 1;
-    justify-content: center;
-
-    @include lg {
-      display: none;
-    }
-  }
-
-  &__nav-item {
-    position: relative;
-
-    &--dropdown:hover .hk-header__dropdown,
-    &--dropdown:focus-within .hk-header__dropdown {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    &--dropdown:hover .hk-header__dropdown-panel,
-    &--dropdown:focus-within .hk-header__dropdown-panel {
-      transform: translateY(0);
-    }
-  }
-
-  &__nav-icon {
-    font-size: 16px;
-    opacity: 0.85;
-    flex-shrink: 0;
-  }
-
-  &__nav-link {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: $radius-sm;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    color: $text-white-80;
-    transition: $transition-fast;
-    white-space: nowrap;
-
-    &:hover {
-      color: $text-white;
-      background: rgba(255, 255, 255, 0.08);
-    }
-  }
-
-  &__nav-arrow {
-    font-size: 14px;
-    margin-left: 2px;
-    transition: $transition-fast;
-
-    .hk-header__nav-item--dropdown:hover & {
-      transform: rotate(180deg);
-    }
-  }
-
-  // --- Dropdown ---
-  &__dropdown {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    min-width: 220px;
-    padding-top: 8px;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity $transition-base, visibility $transition-base;
-  }
-
-  &__dropdown-panel {
-    position: relative;
-    background: $secondary-light;
-    border-radius: $radius-md;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: $shadow-xl;
-    padding: $spacing-sm;
-    transform: translateY(8px);
-    transition: transform $transition-base;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: -6px;
-      left: 50%;
-      width: 12px;
-      height: 12px;
-      background: $secondary-light;
-      border-left: 1px solid rgba(255, 255, 255, 0.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      transform: translateX(-50%) rotate(45deg);
-    }
-  }
-
-  &__dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    border-radius: $radius-sm;
-    font-size: $font-size-sm;
-    color: $text-white-80;
-    transition: $transition-fast;
-
-    &:hover {
-      background: rgba($primary, 0.15);
-      color: $primary-light;
-    }
-  }
-
-  &__dropdown-icon {
-    font-size: 16px;
-    opacity: 0.7;
-    flex-shrink: 0;
-  }
-
-  // --- Actions ---
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    flex-shrink: 0;
-
-    @include lg {
-      display: none;
-    }
-  }
-
-  &__btn-login,
-  &__btn-register {
-    .ti {
-      font-size: 16px;
-    }
-  }
-
-  &__btn-login {
-    height: 38px !important;
-    padding: 0 18px !important;
-    border-radius: $radius-sm !important;
-    font-size: $font-size-sm !important;
-    font-weight: $font-weight-medium !important;
-    background: transparent !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    color: $text-white !important;
-
-    &:hover {
-      border-color: $text-white !important;
-      background: rgba(255, 255, 255, 0.08) !important;
-    }
-  }
-
-  &__btn-register {
-    height: 38px !important;
-    padding: 0 18px !important;
-    border-radius: $radius-sm !important;
-    font-size: $font-size-sm !important;
-    font-weight: $font-weight-semibold !important;
-  }
-
-  // --- Mobile Toggle ---
-  &__mobile-toggle {
-    display: none;
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: $radius-sm;
-    color: $text-white;
-    padding: 8px 10px;
-    cursor: pointer;
-    transition: $transition-fast;
-
-    .ti {
-      font-size: 22px;
-    }
-
-    @include lg {
-      display: flex;
-      align-items: center;
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
+    padding: 0 20px;
+    gap: 16px;
   }
 }
 
-// ===========================
-// MOBILE DRAWER
-// ===========================
-.hk-mobile-drawer {
-  .ant-drawer-header {
-    background: $secondary;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
+// ─── Logo ─────────────────────────────────────────────────────────────────────
 
-  .ant-drawer-body {
-    background: $secondary;
-    padding: $spacing-md;
-  }
+.hk-header__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: $transition-fast;
 
-  .ant-drawer-close {
-    color: $text-white-60;
-  }
-
-  &__logo {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    color: $text-white;
-    font-weight: $font-weight-bold;
-    font-size: $font-size-base;
+  &:hover .hk-header__logo-icon {
+    box-shadow: 0 0 18px $lo-glow;
+    transform: scale(1.04);
   }
 }
 
-.hk-mobile-nav {
+.hk-header__logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  background: linear-gradient(135deg, $lo 0%, $lo-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  transition: $transition-base;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.hk-header__logo-text {
   display: flex;
   flex-direction: column;
+  line-height: 1.1;
+}
+
+.hk-header__logo-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: $text-white;
+  letter-spacing: -0.3px;
+}
+
+.hk-header__logo-sub {
+  font-size: 10px;
+  color: $text-muted;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+
+.hk-header__search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.hk-header__search-icon {
+  position: absolute;
+  left: 12px;
+  color: $text-muted;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.hk-header__search-input {
+  width: 100%;
+  height: 36px;
+  background: $input-bg;
+  border: 1px solid $header-border;
+  border-radius: $radius-sm;
+  padding: 0 40px 0 36px;
+  font-size: 13px;
+  color: $text-white;
+  outline: none;
+  transition: $transition-base;
+  font-family: inherit;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:focus {
+    border-color: $lo-border;
+    background: $lo-bg;
+    box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.08);
+  }
+}
+
+.hk-header__search-kbd {
+  position: absolute;
+  right: 10px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $header-border;
+  border-radius: 4px;
+  font-size: 10px;
+  color: $text-muted;
+  font-family: inherit;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+
+.hk-header__actions {
+  display: flex;
+  align-items: center;
   gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
 
-  &__group {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding-bottom: 4px;
-    margin-bottom: 4px;
-  }
+// Icon button (bell)
+.hk-header__icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  color: $text-secondary;
+  transition: $transition-fast;
+  padding: 0;
 
-  &__link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: $radius-sm;
-    font-weight: $font-weight-semibold;
-    font-size: $font-size-base;
+  &:hover {
+    background: $hover-bg;
     color: $text-white;
-    transition: $transition-fast;
+  }
+}
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.06);
+.hk-header__icon-btn-inner {
+  font-size: 17px;
+  display: block;
+}
+
+// Divider
+.hk-header__divider {
+  width: 1px;
+  height: 20px;
+  background: $header-border;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+// Profile button
+.hk-header__profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid $header-border;
+  border-radius: $radius-md;
+  padding: 4px 10px 4px 4px;
+  cursor: pointer;
+  transition: $transition-fast;
+  color: $text-secondary;
+
+  &:hover {
+    background: $hover-bg;
+    border-color: rgba(255, 255, 255, 0.10);
+    color: $text-white;
+
+    .hk-header__profile-chevron {
+      color: $text-secondary;
+      transform: translateY(1px);
     }
   }
+}
 
-  &__sub {
-    padding-left: $spacing-md;
+.hk-header__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $lo-dark 0%, $lo-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.hk-header__profile-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-align: left;
+
+  @media (max-width: 576px) {
+    display: none;
   }
+}
 
-  &__icon {
-    font-size: 18px;
-    opacity: 0.85;
-    flex-shrink: 0;
-  }
+.hk-header__profile-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-white;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  &__sub-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: $radius-sm;
-    font-size: $font-size-sm;
-    color: $text-white-60;
-    transition: $transition-fast;
+.hk-header__profile-role {
+  font-size: 10px;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
 
-    &:hover {
-      color: $primary-light;
-    }
-  }
-
-  &__sub-icon {
-    font-size: 15px;
-    opacity: 0.65;
-    flex-shrink: 0;
-  }
-
-  &__actions {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-sm;
-    margin-top: $spacing-xl;
-
-    .ant-btn-default {
-      border-color: rgba(255, 255, 255, 0.2) !important;
-      color: $text-white !important;
-      background: transparent !important;
-      height: 44px !important;
-      border-radius: $radius-md !important;
-    }
-
-    .ant-btn-primary {
-      height: 44px !important;
-      border-radius: $radius-md !important;
-    }
-  }
+.hk-header__profile-chevron {
+  width: 14px;
+  height: 14px;
+  color: $text-muted;
+  transition: $transition-fast;
+  flex-shrink: 0;
 }

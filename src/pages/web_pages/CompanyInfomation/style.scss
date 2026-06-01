@@ -1,0 +1,158 @@
+@import "../../../color.scss";
+
+.company-information-page {
+  padding: 24px;
+  color: $text-primary;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      color: $text-primary;
+    }
+
+    p {
+      margin: 0;
+      color: $text-secondary;
+    }
+  }
+
+  &__section-card {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: $shadow-sm;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 16px;
+      color: $text-primary;
+    }
+  }
+
+  &__inline-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__inline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    h3 {
+      margin: 0;
+    }
+  }
+
+  &__group {
+    position: relative;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__group-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  &__image-upload {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__image-upload-label {
+    font-size: 12px;
+    color: $text-secondary;
+  }
+
+  &__image-preview {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  &__add-btn {
+    width: 100%;
+    border-color: rgba(249, 115, 22, 0.45);
+    color: $accent-orange-2;
+  }
+
+  &__preview {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    h2 {
+      margin: 0;
+      color: $text-white;
+    }
+
+    p {
+      margin: 0;
+      color: $text-secondary;
+      line-height: 1.6;
+    }
+  }
+
+  &__preview-block {
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 4px solid $accent-orange;
+    padding: 12px;
+
+    strong {
+      display: block;
+      margin-bottom: 8px;
+      color: $text-primary;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: $text-secondary;
+    }
+
+    &--warning {
+      border-left-color: #f5a623;
+    }
+  }
+
+  &__seo-result {
+    margin: 0 0 6px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 18px;
+  }
+}

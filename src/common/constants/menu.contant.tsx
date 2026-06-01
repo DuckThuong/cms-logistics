@@ -1,5 +1,9 @@
 import { ROUTER_PATH } from "@/routers/Route";
-import { DashboardOutlined, HomeOutlined } from "@ant-design/icons";
+import {
+  DashboardOutlined,
+  FileTextOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 import type React from "react";
 
 export type MenuBadge = {
@@ -26,6 +30,7 @@ export type BreadcrumbCrumb = {
 
 export const MENU_PATHS: Record<string, string> = {
   dashboard: ROUTER_PATH.DASHBOARD,
+  companyInformation: ROUTER_PATH.COMPANY_INFORMATION,
 };
 
 const ADMIN_MENU_GROUPS: AppMenuGroup[] = [
@@ -40,10 +45,22 @@ const ADMIN_MENU_GROUPS: AppMenuGroup[] = [
       },
     ],
   },
+  {
+    label: "Web pages",
+    items: [
+      {
+        key: "companyInformation",
+        icon: <FileTextOutlined />,
+        label: "Company Information",
+        badge: null,
+      },
+    ],
+  },
 ];
 
 export const ADMIN_ALLOWED_MENU_KEYS = new Set([
   "dashboard",
+  "companyInformation",
   "providers",
   "customers",
 ]);
@@ -66,17 +83,7 @@ export const isPathAllowedForRole = (pathname: string): boolean => {
 export const getBreadcrumbs = (activeKey: string): BreadcrumbCrumb[] => {
   const routeMap: Record<string, BreadcrumbCrumb[]> = {
     dashboard: [{ icon: <HomeOutlined />, label: "Dashboard" }],
-    bookings: [{ label: "Vận hành" }, { label: "Đặt vé" }],
-    providers: [{ label: "Quản lý" }, { label: "Nhà xe" }],
-    trips: [{ label: "Vận hành" }, { label: "Chuyến xe" }],
-    routes: [{ label: "Vận hành" }, { label: "Tuyến đường" }],
-    vehicles: [{ label: "Vận hành" }, { label: "Phương tiện" }],
-    customers: [{ label: "Quản lý" }, { label: "Khách hàng" }],
-    drivers: [{ label: "Quản lý" }, { label: "Tài xế" }],
-    revenue: [{ label: "Quản lý" }, { label: "Doanh thu" }],
-    reports: [{ label: "Quản lý" }, { label: "Báo cáo" }],
-    settings: [{ label: "Hệ thống" }, { label: "Cài đặt" }],
-    help: [{ label: "Hệ thống" }, { label: "Trợ giúp" }],
+    companyInformation: [{ label: "Web pages" }, { label: "Company Information" }],
   };
 
   return routeMap[activeKey] ?? routeMap.dashboard;
