@@ -29,6 +29,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  const hideNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+  }, []);
+
   const showNotification = useCallback(
     (message: string, type: "error" | "success") => {
       const id = Date.now().toString() + Math.random().toString(36);
@@ -40,12 +44,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         hideNotification(id);
       }, 5000);
     },
-    []
+    [hideNotification],
   );
-
-  const hideNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
-  }, []);
 
   return (
     <NotificationContext.Provider

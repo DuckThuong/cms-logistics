@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ROUTER_PATH } from "../router/Route";
+import { ROUTER_PATH } from "../routers/Route";
 
 const BASE_URL = process.env.REACT_APP_API_URL ?? "http://localhost:8000/";
 

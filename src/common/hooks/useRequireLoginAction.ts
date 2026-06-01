@@ -5,7 +5,7 @@ import {
   type LoginRequiredModalOptions,
   useLoginRequiredModal,
 } from "../../providers/loginRequiredModalProvider";
-import { ROUTER_PATH } from "../../router/Route";
+import { ROUTER_PATH } from "../../routers/Route";
 
 interface RequireLoginActionOptions extends LoginRequiredModalOptions {
   shouldNavigateToSignIn?: boolean;

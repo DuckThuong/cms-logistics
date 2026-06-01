@@ -1,15 +1,52 @@
 const ROUTER = "";
 
 export const ROUTER_NAME = {
+  SIGN_IN: "",
   LOGIN: "",
   MAIN_PAGE: "main-page",
   NOT_FOUND: "*",
   DASHBOARD: "dashboard",
+
+  // Following routes are placeholders (some pages are not implemented yet).
+  ABOUT_PAGE: "about",
+  SERVICE: "service",
+  SERVICE_ORDER: "service-order",
+  SERVICE_PAYMENT: "service-payment",
+  SERVICE_SHIPPING: "service-shipping",
+  PRICE: "price",
+  PRICE_ORDER: "price-order",
+  PRICE_KY_GUI: "price-ky-gui",
+  PRICE_CHINH_NGACH: "price-chinh-ngach",
+  POLICY: "policy",
+  POLICY_LUU_KHO: "policy-luu-kho",
+  POLICY_KHIEN_NAI: "policy-khieu-nai",
+  POLICY_BAO_MAT: "policy-bao-mat",
+  POLICY_CAM_NHAP_KHAU: "policy-cam-nhap-khau",
+  HUONG_DAN: "huong-dan",
+  TIN_TUC: "tin-tuc",
 };
 
 export const ROUTER_PATH = {
   LOGIN: `${ROUTER}/${ROUTER_NAME.LOGIN}`,
+  SIGN_IN: `${ROUTER}/${ROUTER_NAME.SIGN_IN}`,
   MAIN_PAGE: `${ROUTER}/${ROUTER_NAME.MAIN_PAGE}`,
   NOT_FOUND: `${ROUTER}/${ROUTER_NAME.NOT_FOUND}`,
   DASHBOARD: `${ROUTER}/${ROUTER_NAME.DASHBOARD}`,
+
+  ABOUT_PAGE: `${ROUTER}/${ROUTER_NAME.ABOUT_PAGE}`,
+  SERVICE: `${ROUTER}/${ROUTER_NAME.SERVICE}`,
+  SERVICE_ORDER: `${ROUTER}/${ROUTER_NAME.SERVICE_ORDER}`,
+  SERVICE_PAYMENT: `${ROUTER}/${ROUTER_NAME.SERVICE_PAYMENT}`,
+  SERVICE_SHIPPING: `${ROUTER}/${ROUTER_NAME.SERVICE_SHIPPING}`,
+  PRICE: `${ROUTER}/${ROUTER_NAME.PRICE}`,
+  PRICE_ORDER: `${ROUTER}/${ROUTER_NAME.PRICE_ORDER}`,
+  PRICE_KY_GUI: `${ROUTER}/${ROUTER_NAME.PRICE_KY_GUI}`,
+  PRICE_CHINH_NGACH: `${ROUTER}/${ROUTER_NAME.PRICE_CHINH_NGACH}`,
+  POLICY: `${ROUTER}/${ROUTER_NAME.POLICY}`,
+  POLICY_LUU_KHO: `${ROUTER}/${ROUTER_NAME.POLICY_LUU_KHO}`,
+  POLICY_KHIEN_NAI: `${ROUTER}/${ROUTER_NAME.POLICY_KHIEN_NAI}`,
+  POLICY_BAO_MAT: `${ROUTER}/${ROUTER_NAME.POLICY_BAO_MAT}`,
+  POLICY_CAM_NHAP_KHAU: `${ROUTER}/${ROUTER_NAME.POLICY_CAM_NHAP_KHAU}`,
+  HUONG_DAN: `${ROUTER}/${ROUTER_NAME.HUONG_DAN}`,
+  TIN_TUC: `${ROUTER}/${ROUTER_NAME.TIN_TUC}`,
 };
