@@ -7,6 +7,7 @@ export const COMPANY_INFORMATION_DEFAULTS: CompanyInformationContent = {
   pageSubtitle:
     "Đơn vị trung gian uy tín trong lĩnh vực đặt hàng, thanh toán ủy thác và vận chuyển hàng hóa từ Trung Quốc về Việt Nam.",
   introTitle: "Giới thiệu tổng quan",
+  introAnchor: "gioi-thieu-tong-quan",
   introContent:
     "Công Ty Logistics là đơn vị trung gian cung cấp các dịch vụ: Đặt hàng, Thanh toán ủy thác và Vận chuyển hàng hóa từ Trung Quốc về Việt Nam.",
   introImageUrl:
@@ -18,24 +19,34 @@ export const COMPANY_INFORMATION_DEFAULTS: CompanyInformationContent = {
       description: "Bạn có thể thêm các thẻ/đoạn mô tả tuỳ biến ở phần header.",
     },
   ],
-  servicesTitle: "I. Các dịch vụ do Công Ty Logistics cung cấp:",
-  services: [
-    "Tư vấn tìm kiếm nguồn hàng trên các website bán buôn, bán lẻ hàng đầu Trung Quốc.",
-    "Mua hàng hộ và Kiểm tra hàng hóa.",
-    "Thanh toán hộ đơn hàng theo ủy thác, ký gửi hàng hóa theo yêu cầu.",
-    "Đóng gói và Vận chuyển hàng hóa về Việt Nam.",
-  ],
-  refusalsTitle:
-    "II. Công Ty Logistics từ chối cung cấp dịch vụ khi khách hàng có hành vi sau:",
-  refusals: [
-    "Phát tán hoặc đăng tải thông tin sai sự thật gây ảnh hưởng đến uy tín doanh nghiệp.",
-    "Gian lận trong giao dịch và công nợ.",
-    "Cố ý mua bán sản phẩm thuộc danh mục cấm nhập khẩu.",
+  policySections: [
+    {
+      id: "policy-services",
+      title: "I. Các dịch vụ do Công Ty Logistics cung cấp:",
+      anchor: "dich-vu",
+      content: [
+        "Tư vấn tìm kiếm nguồn hàng trên các website bán buôn, bán lẻ hàng đầu Trung Quốc.",
+        "Mua hàng hộ và Kiểm tra hàng hóa.",
+        "Thanh toán hộ đơn hàng theo ủy thác, ký gửi hàng hóa theo yêu cầu.",
+        "Đóng gói và Vận chuyển hàng hóa về Việt Nam.",
+      ],
+    },
+    {
+      id: "policy-refusals",
+      title:
+        "II. Công Ty Logistics từ chối cung cấp dịch vụ khi khách hàng có hành vi sau:",
+      anchor: "tu-choi",
+      content: [
+        "Phát tán hoặc đăng tải thông tin sai sự thật gây ảnh hưởng đến uy tín doanh nghiệp.",
+        "Gian lận trong giao dịch và công nợ.",
+        "Cố ý mua bán sản phẩm thuộc danh mục cấm nhập khẩu.",
+      ],
+    },
   ],
   sections: [
     {
       id: "sec-1",
-      anchor: "#gioi-thieu",
+      anchor: "tong-quan",
       title: "Tổng quan",
       description: "Khối nội dung dạng section (có thể thêm/xóa).",
       content:
@@ -52,9 +63,5 @@ export const COMPANY_INFORMATION_DEFAULTS: CompanyInformationContent = {
     { id: "daily-orders", label: "800+ đơn/ngày" },
     { id: "customers", label: "10K+ khách hàng" },
   ],
-  quickLinks: [
-    { id: "intro", label: "Tổng quan", anchor: "#gioi-thieu" },
-    { id: "services", label: "Dịch vụ cung cấp", anchor: "#dich-vu" },
-    { id: "refusal", label: "Chính sách từ chối", anchor: "#tu-choi" },
-  ],
+  quickLinks: [],
 };

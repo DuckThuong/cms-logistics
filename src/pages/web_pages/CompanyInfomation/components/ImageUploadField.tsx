@@ -4,7 +4,7 @@ import type { UploadRequestOption } from "rc-upload/lib/interface";
 
 type ImageUploadFieldProps = {
   value?: string;
-  onChange: (nextValue: string) => void;
+  onChange?: (nextValue: string) => void;
   label?: string;
 };
 
@@ -23,7 +23,7 @@ export const ImageUploadField = ({ value, onChange, label }: ImageUploadFieldPro
     try {
       const file = options.file as File;
       const dataUrl = await fileToDataUrl(file);
-      onChange(dataUrl);
+      onChange?.(dataUrl);
       options.onSuccess?.({ url: dataUrl }, new XMLHttpRequest());
     } catch (error) {
       options.onError?.(error as Error);

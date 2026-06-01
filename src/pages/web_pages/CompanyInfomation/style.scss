@@ -1,45 +1,271 @@
-@import "../../../color.scss";
+// ─── Logistics palette (aligned with Header.scss) ─────────────────────────────
+$lo:          #ff6a00;
+$lo-light:    #ff8533;
+$lo-border:   rgba(255, 106, 0, 0.28);
+$lo-bg:       rgba(255, 106, 0, 0.10);
+
+// ─── Light content surface (app-layout__main) ───────────────────────────────────
+$page-text-title:    #0f172a;
+$page-text-body:     #475569;
+$page-text-muted:    #64748b;
+$card-bg:            #ffffff;
+$card-border:        #e8eaf0;
+$card-shadow:        0 1px 3px rgba(15, 23, 42, 0.06);
+$group-bg:           #f8fafc;
+$group-border:       #e2e8f0;
+$input-border:       #e2e8f0;
+$input-hover-border: rgba(15, 23, 42, 0.15);
+
+$radius-sm: 8px;
+$radius-md: 12px;
+
+$transition-fast: all 0.15s ease;
+$transition-base: all 0.25s ease;
+
+// ─── Page block ───────────────────────────────────────────────────────────────
 
 .company-information-page {
-  padding: 24px;
-  color: $text-primary;
+  color: $page-text-body;
+
+  &--client-view {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  &__bottom-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-top: 0;
+    padding: 16px 0 20px;
+    background: #f4f5f8;
+    border-top: 1px solid $card-border;
+  }
+
+  // ─── Page header ──────────────────────────────────────────────────────────
 
   &__header {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    padding-top: 4px;
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: 24px;
-      color: $text-primary;
-    }
-
-    p {
-      margin: 0;
-      color: $text-secondary;
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, $lo 0%, $lo-light 40%, transparent 100%);
+      border-radius: 1px;
     }
   }
 
+  &__header-text {
+    padding-top: 10px;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 700;
+    color: $page-text-title;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: $page-text-muted;
+    line-height: 1.5;
+    max-width: 560px;
+  }
+
+  // ─── Section cards ────────────────────────────────────────────────────────
+
   &__section-card {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: $shadow-sm;
+    background: $card-bg;
+    border: 1px solid $card-border;
+    border-radius: $radius-md;
+    padding: 18px 20px;
+    box-shadow: $card-shadow;
+    transition: $transition-fast;
+
+    &:hover {
+      border-color: rgba(255, 106, 0, 0.2);
+    }
 
     h3 {
       margin-top: 0;
       margin-bottom: 16px;
-      font-size: 16px;
-      color: $text-primary;
+      font-size: 15px;
+      font-weight: 600;
+      color: $page-text-title;
     }
+
+    small {
+      color: $page-text-muted;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  }
+
+  &__section-card-title {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: $page-text-title;
+  }
+
+  &__empty-add {
+    display: flex;
+    justify-content: center;
+    padding: 24px 0 8px;
+  }
+
+  &__policy-section {
+    position: relative;
+    margin-bottom: 16px;
+    padding: 14px 40px 14px 14px;
+    border-radius: 10px;
+    background: $group-bg;
+    border: 1px solid $group-border;
+
+    &:last-of-type {
+      margin-bottom: 12px;
+    }
+  }
+
+  &__content-field {
+    margin-bottom: 0 !important;
+  }
+
+  &__content-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  &__content-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .ant-input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__quick-links-hint {
+    margin: -8px 0 12px;
+    font-size: 12px;
+    color: $page-text-muted;
+    line-height: 1.5;
+  }
+
+  &__quick-links-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__quick-links-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: $group-bg;
+    border: 1px solid $group-border;
+  }
+
+  &__quick-links-icon {
+    color: $lo;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  &__quick-links-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: $page-text-title;
+  }
+
+  &__quick-links-anchor {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 106, 0, 0.08);
+    color: $lo;
+    border: 1px solid $lo-border;
+    flex-shrink: 0;
+  }
+
+  &__add-section-btn {
+    width: 100%;
+    border-color: $lo-border !important;
+    color: $lo !important;
+
+    &:hover {
+      border-color: $lo !important;
+      color: $lo-light !important;
+      background: $lo-bg !important;
+    }
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    h3 {
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__add-icon-btn {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, $lo 0%, $lo-light 100%) !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(255, 106, 0, 0.25);
+    transition: $transition-fast;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(255, 106, 0, 0.35);
+    }
+  }
+
+  &__empty-hint {
+    margin: 0;
+    padding: 8px 0 4px;
+    font-size: 13px;
+    color: $page-text-muted;
+    font-style: italic;
   }
 
   &__inline-field {
@@ -51,30 +277,33 @@
   &__inline-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 8px 12px;
   }
 
-  &__section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
-
-    h3 {
-      margin: 0;
-    }
+  &__grid-field {
+    margin-bottom: 0 !important;
   }
+
+  &__field-pair {
+    margin-bottom: 4px;
+  }
+
+  // ─── Repeater groups ──────────────────────────────────────────────────────
 
   &__group {
     position: relative;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 12px;
+    background: $group-bg;
+    border: 1px solid $group-border;
+    padding: 12px 40px 12px 12px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    transition: $transition-fast;
+
+    &:hover {
+      border-color: rgba(255, 106, 0, 0.18);
+    }
   }
 
   &__group-actions {
@@ -82,6 +311,8 @@
     top: 8px;
     right: 8px;
   }
+
+  // ─── Image upload ─────────────────────────────────────────────────────────
 
   &__image-upload {
     display: flex;
@@ -91,20 +322,16 @@
 
   &__image-upload-label {
     font-size: 12px;
-    color: $text-secondary;
+    color: $page-text-muted;
   }
 
   &__image-preview {
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid $card-border;
   }
 
-  &__add-btn {
-    width: 100%;
-    border-color: rgba(249, 115, 22, 0.45);
-    color: $accent-orange-2;
-  }
+  // ─── Preview panel ────────────────────────────────────────────────────────
 
   &__preview {
     display: flex;
@@ -113,26 +340,30 @@
 
     h2 {
       margin: 0;
-      color: $text-white;
+      font-size: 18px;
+      font-weight: 700;
+      color: $page-text-title;
+      letter-spacing: -0.2px;
     }
 
     p {
       margin: 0;
-      color: $text-secondary;
+      color: $page-text-body;
       line-height: 1.6;
     }
   }
 
   &__preview-block {
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border-left: 4px solid $accent-orange;
-    padding: 12px;
+    background: $group-bg;
+    border-left: 4px solid $lo;
+    padding: 12px 14px;
 
     strong {
       display: block;
       margin-bottom: 8px;
-      color: $text-primary;
+      color: $page-text-title;
+      font-weight: 600;
     }
 
     ul {
@@ -141,18 +372,63 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      color: $text-secondary;
+      color: $page-text-body;
     }
 
     &--warning {
-      border-left-color: #f5a623;
+      border-left-color: #eab308;
     }
   }
 
   &__seo-result {
     margin: 0 0 6px;
-    color: #ffffff;
+    color: $lo;
     font-weight: 600;
     font-size: 18px;
+    word-break: break-all;
+  }
+
+  // ─── Ant Design (scoped) ──────────────────────────────────────────────────
+
+  .ant-form-item-label > label {
+    color: $page-text-body !important;
+    font-weight: 500;
+  }
+
+  .ant-input,
+  .ant-input-affix-wrapper,
+  textarea.ant-input {
+    border-color: $input-border;
+    transition: $transition-base;
+
+    &:hover {
+      border-color: $input-hover-border;
+    }
+
+    &:focus,
+    &-focused {
+      border-color: $lo-border;
+      box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.08);
+    }
+  }
+
+  .ant-input-affix-wrapper-focused {
+    border-color: $lo-border;
+    box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.08);
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .company-information-page {
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__inline-grid {
+      grid-template-columns: 1fr;
+    }
   }
 }

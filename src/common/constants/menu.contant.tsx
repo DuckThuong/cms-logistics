@@ -51,7 +51,7 @@ const ADMIN_MENU_GROUPS: AppMenuGroup[] = [
       {
         key: "companyInformation",
         icon: <FileTextOutlined />,
-        label: "Company Information",
+        label: "Thông tin công ty",
         badge: null,
       },
     ],
@@ -83,7 +83,7 @@ export const isPathAllowedForRole = (pathname: string): boolean => {
 export const getBreadcrumbs = (activeKey: string): BreadcrumbCrumb[] => {
   const routeMap: Record<string, BreadcrumbCrumb[]> = {
     dashboard: [{ icon: <HomeOutlined />, label: "Dashboard" }],
-    companyInformation: [{ label: "Web pages" }, { label: "Company Information" }],
+    companyInformation: [{ label: "Web pages" }, { label: "Thông tin công ty" }],
   };
 
   return routeMap[activeKey] ?? routeMap.dashboard;

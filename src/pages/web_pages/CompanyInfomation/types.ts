@@ -24,19 +24,27 @@ export interface ContentSectionItem {
   imageUrl?: string;
 }
 
+/** Khối dịch vụ / từ chối: tiêu đề + danh sách dòng nội dung */
+export interface TitledContentSection {
+  id: string;
+  title: string;
+  /** Liên kết nhanh (#anchor) */
+  anchor: string;
+  content: string[];
+}
+
 export interface CompanyInformationContent {
   seoUrl: string;
   pageTag: string;
   pageTitle: string;
   pageSubtitle: string;
   introTitle: string;
+  /** Liên kết nhanh (#anchor) cho khối giới thiệu */
+  introAnchor: string;
   introContent: string;
   introImageUrl: string;
   headerExtras: ExtraFieldItem[];
-  servicesTitle: string;
-  services: string[];
-  refusalsTitle: string;
-  refusals: string[];
+  policySections: TitledContentSection[];
   sections: ContentSectionItem[];
   closingLineOne: string;
   closingLineTwo: string;
