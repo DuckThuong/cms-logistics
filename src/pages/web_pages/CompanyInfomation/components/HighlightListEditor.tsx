@@ -2,6 +2,7 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Space } from "antd";
 import { useState } from "react";
 import type { HighlightItem } from "../types";
+import { IconStringField } from "./IconStringField";
 import { SectionCardHeader } from "./SectionCardHeader";
 
 type HighlightListEditorProps = {
@@ -13,11 +14,11 @@ const newId = () => `hl-${Math.random().toString(36).slice(2, 10)}`;
 
 export const HighlightListEditor = ({ values, onChange }: HighlightListEditorProps) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [form] = Form.useForm<{ id: string; label: string }>();
+  const [form] = Form.useForm<{ id: string; label: string; icon: string }>();
 
   const openModal = () => {
     form.resetFields();
-    form.setFieldsValue({ id: newId() });
+    form.setFieldsValue({ id: newId(), icon: "" });
     setModalOpen(true);
   };
 
@@ -28,6 +29,7 @@ export const HighlightListEditor = ({ values, onChange }: HighlightListEditorPro
       {
         id: fields.id.trim(),
         label: fields.label.trim(),
+        icon: fields.icon?.trim() ?? "",
       },
     ]);
     setModalOpen(false);
@@ -82,6 +84,12 @@ export const HighlightListEditor = ({ values, onChange }: HighlightListEditorPro
                   }
                 />
               </div>
+              <Form.Item label="Icon" className="company-information-page__grid-field">
+                <IconStringField
+                  value={item.icon}
+                  onChange={(icon) => updateItem(index, { ...item, icon })}
+                />
+              </Form.Item>
             </div>
           ))}
         </Space>
@@ -110,6 +118,9 @@ export const HighlightListEditor = ({ values, onChange }: HighlightListEditorPro
             rules={[{ required: true, message: "Vui lòng nhập nhãn" }]}
           >
             <Input placeholder="Nhãn hiển thị" />
+          </Form.Item>
+          <Form.Item name="icon" label="Icon (URL hoặc emoji)">
+            <Input placeholder="https://... hoặc 🚚" />
           </Form.Item>
         </Form>
       </Modal>

@@ -16,6 +16,7 @@ export const deriveQuickLinks = (content: DeriveQuickLinksInput): QuickLinkItem[
       id: "intro",
       label: introLabel,
       anchor: normalizeAnchorHash(content.introAnchor ?? "", introFallback),
+      icon: "",
     });
   }
 
@@ -29,6 +30,7 @@ export const deriveQuickLinks = (content: DeriveQuickLinksInput): QuickLinkItem[
       id: section.id,
       label,
       anchor: normalizeAnchorHash(section.anchor ?? "", fallback),
+      icon: "",
     });
   }
 
@@ -42,8 +44,21 @@ export const deriveQuickLinks = (content: DeriveQuickLinksInput): QuickLinkItem[
       id: section.id,
       label,
       anchor: normalizeAnchorHash(section.anchor, fallback),
+      icon: "",
     });
   }
 
   return links;
+};
+
+/** Gắn icon đã lưu (chỉnh ở panel Xem nhanh) vào danh sách liên kết tự sinh */
+export const mergeQuickLinkIcons = (
+  derived: QuickLinkItem[],
+  saved: QuickLinkItem[],
+): QuickLinkItem[] => {
+  const iconById = new Map(saved.map((link) => [link.id, link.icon ?? ""]));
+  return derived.map((link) => ({
+    ...link,
+    icon: iconById.get(link.id) ?? "",
+  }));
 };

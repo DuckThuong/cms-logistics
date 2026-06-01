@@ -11,7 +11,7 @@ import { HighlightListEditor } from "./components/HighlightListEditor";
 import { ImageUploadField } from "./components/ImageUploadField";
 import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
-import { deriveQuickLinks } from "./deriveQuickLinks";
+import { deriveQuickLinks, mergeQuickLinkIcons } from "./deriveQuickLinks";
 import { SectionsEditor } from "./components/SectionsEditor";
 import { SeoSection } from "./components/SeoSection";
 import type { CompanyInformationContent } from "./types";
@@ -47,16 +47,6 @@ export const CompanyInformationPage = () => {
     [content.seoUrl],
   );
 
-  const derivedQuickLinks = useMemo(
-    () => deriveQuickLinks(content),
-    [content.introTitle, content.introAnchor, content.policySections, content.sections],
-  );
-
-  const contentForPreview = useMemo(
-    () => ({ ...content, seoUrl: normalizedSeoUrl, quickLinks: derivedQuickLinks }),
-    [content, normalizedSeoUrl, derivedQuickLinks],
-  );
-
   const updateField = <K extends keyof CompanyInformationContent>(
     field: K,
     value: CompanyInformationContent[K],
@@ -67,13 +57,37 @@ export const CompanyInformationPage = () => {
     }));
   };
 
+  const derivedQuickLinks = useMemo(
+    () => mergeQuickLinkIcons(deriveQuickLinks(content), content.quickLinks),
+    [
+      content.introTitle,
+      content.introAnchor,
+      content.policySections,
+      content.sections,
+      content.quickLinks,
+    ],
+  );
+
+  const handleQuickLinkIconChange = (linkId: string, icon: string) => {
+    const merged = mergeQuickLinkIcons(deriveQuickLinks(content), content.quickLinks);
+    updateField(
+      "quickLinks",
+      merged.map((link) => (link.id === linkId ? { ...link, icon } : link)),
+    );
+  };
+
+  const contentForPreview = useMemo(
+    () => ({ ...content, seoUrl: normalizedSeoUrl, quickLinks: derivedQuickLinks }),
+    [content, normalizedSeoUrl, derivedQuickLinks],
+  );
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
       const payload: CompanyInformationContent = {
         ...content,
         seoUrl: normalizeSeoUrl(content.seoUrl),
-        quickLinks: deriveQuickLinks(content),
+        quickLinks: mergeQuickLinkIcons(deriveQuickLinks(content), content.quickLinks),
       };
       localStorage.setItem("cms.company-information.about", JSON.stringify(payload));
       setContent(payload);
@@ -228,7 +242,10 @@ export const CompanyInformationPage = () => {
           onChange={(nextValues) => updateField("sections", nextValues)}
         />
 
-        <QuickLinksAutoPanel links={derivedQuickLinks} />
+        <QuickLinksAutoPanel
+          links={derivedQuickLinks}
+          onIconChange={handleQuickLinkIconChange}
+        />
 
         <section className="company-information-page__section-card">
           <h3>Lời kết</h3>

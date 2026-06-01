@@ -59,9 +59,9 @@ export const COMPANY_INFORMATION_DEFAULTS: CompanyInformationContent = {
     "Công Ty Logistics xin chân thành cảm ơn và mong muốn được đồng hành cùng Quý Khách hàng!",
   closingLineTwo: "Trân trọng!",
   highlights: [
-    { id: "experience", label: "10+ năm kinh nghiệm" },
-    { id: "daily-orders", label: "800+ đơn/ngày" },
-    { id: "customers", label: "10K+ khách hàng" },
+    { id: "experience", label: "10+ năm kinh nghiệm", icon: "" },
+    { id: "daily-orders", label: "800+ đơn/ngày", icon: "" },
+    { id: "customers", label: "10K+ khách hàng", icon: "" },
   ],
   quickLinks: [],
 };

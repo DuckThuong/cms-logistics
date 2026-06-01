@@ -83,6 +83,9 @@ $ci-gold: #eab308;
   }
 
   &__highlight {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 8px 14px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.06);
@@ -90,6 +93,20 @@ $ci-gold: #eab308;
     font-size: 13px;
     font-weight: 500;
     color: rgba(241, 245, 249, 0.9);
+  }
+
+  &__highlight-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+
+    &--text {
+      width: auto;
+      height: auto;
+      font-size: 16px;
+      line-height: 1;
+    }
   }
 
   &__quick-nav {
@@ -121,7 +138,9 @@ $ci-gold: #eab308;
   }
 
   &__quick-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 10px 12px;
     border-radius: 8px;
     font-size: 13px;
@@ -133,6 +152,20 @@ $ci-gold: #eab308;
     &:hover {
       background: rgba($ci-primary, 0.15);
       color: #fff;
+    }
+  }
+
+  &__quick-link-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+
+    &--text {
+      width: auto;
+      height: auto;
+      font-size: 16px;
+      line-height: 1;
     }
   }
 

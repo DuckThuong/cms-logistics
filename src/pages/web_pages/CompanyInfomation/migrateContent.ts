@@ -1,17 +1,26 @@
 import { toAnchorId } from "@/common/utils/anchor";
 import { COMPANY_INFORMATION_DEFAULTS } from "./constants";
 import { deriveQuickLinks } from "./deriveQuickLinks";
-import type { CompanyInformationContent, TitledContentSection } from "./types";
+import type {
+  CompanyInformationContent,
+  ContentSectionItem,
+  QuickLinkItem,
+  TitledContentSection,
+} from "./types";
 
 const stripAnchorHash = (value: string) => value.trim().replace(/^#/, "");
 
-const normalizePolicySection = (section: TitledContentSection): TitledContentSection => {
-  const fromInput = toAnchorId(stripAnchorHash(section.anchor ?? ""));
-  const fallback = toAnchorId(section.id) || section.id;
+const normalizePolicySection = (
+  section: TitledContentSection & { icon?: string },
+): TitledContentSection => {
+  const { icon: _icon, ...rest } = section;
+  void _icon;
+  const fromInput = toAnchorId(stripAnchorHash(rest.anchor ?? ""));
+  const fallback = toAnchorId(rest.id) || rest.id;
   return {
-    ...section,
+    ...rest,
     anchor: fromInput || fallback,
-    content: section.content?.length ? [...section.content] : [""],
+    content: rest.content?.length ? [...rest.content] : [""],
   };
 };
 
@@ -24,28 +33,77 @@ const normalizeIntroAnchor = (
   return fromInput || fallback;
 };
 
-type LegacyContent = Partial<CompanyInformationContent> & {
+type LegacyContent = Partial<
+  Omit<CompanyInformationContent, "policySections" | "sections">
+> & {
+  introIcon?: string;
   servicesTitle?: string;
   services?: string[];
   refusalsTitle?: string;
   refusals?: string[];
-  policySections?: TitledContentSection[];
+  policySections?: Array<TitledContentSection & { icon?: string }>;
+  sections?: Array<ContentSectionItem & { icon?: string }>;
 };
+
+/** Chuyển icon cũ (intro/section) sang quickLinks nếu chưa có */
+const migrateLegacyQuickLinkIcons = (
+  raw: LegacyContent,
+  derived: QuickLinkItem[],
+): QuickLinkItem[] => {
+  const iconById = new Map((raw.quickLinks ?? []).map((link) => [link.id, link.icon ?? ""]));
+
+  if (raw.introIcon?.trim() && !iconById.get("intro")) {
+    iconById.set("intro", raw.introIcon.trim());
+  }
+
+  for (const section of raw.policySections ?? []) {
+    if (section.icon?.trim() && !iconById.get(section.id)) {
+      iconById.set(section.id, section.icon.trim());
+    }
+  }
+
+  for (const section of raw.sections ?? []) {
+    const sectionId = section.id;
+    if (section.icon?.trim() && !iconById.get(sectionId)) {
+      iconById.set(sectionId, section.icon.trim());
+    }
+  }
+
+  return derived.map((link) => ({
+    ...link,
+    icon: iconById.get(link.id) ?? "",
+  }));
+};
+
+const ensureHighlightIcons = (data: CompanyInformationContent): CompanyInformationContent => ({
+  ...data,
+  highlights: (data.highlights ?? []).map((item) => ({
+    ...item,
+    icon: item.icon ?? "",
+  })),
+});
 
 const newPolicyId = () => `policy-${Math.random().toString(36).slice(2, 10)}`;
 
 export const migrateCompanyInformationContent = (
   raw: LegacyContent,
 ): CompanyInformationContent => {
-  const withQuickLinks = (data: CompanyInformationContent): CompanyInformationContent => ({
-    ...data,
-    quickLinks: deriveQuickLinks(data),
-  });
+  const withQuickLinks = (data: CompanyInformationContent): CompanyInformationContent => {
+    const normalized = ensureHighlightIcons(data);
+    const derived = deriveQuickLinks(normalized);
+    const quickLinks = migrateLegacyQuickLinkIcons(raw, derived);
+    return {
+      ...normalized,
+      quickLinks,
+    };
+  };
 
   if (Array.isArray(raw.policySections)) {
+    const { introIcon: _legacyIntroIcon, ...restRaw } = raw;
+    void _legacyIntroIcon;
     return withQuickLinks({
       ...COMPANY_INFORMATION_DEFAULTS,
-      ...raw,
+      ...restRaw,
       introAnchor: normalizeIntroAnchor(raw.introAnchor, raw.introTitle),
       policySections: raw.policySections.map(normalizePolicySection),
     });
@@ -80,6 +138,7 @@ export const migrateCompanyInformationContent = (
     services: _legacyServices,
     refusalsTitle: _legacyRefusalsTitle,
     refusals: _legacyRefusals,
+    introIcon: _legacyIntroIcon,
     ...rest
   } = raw;
 
@@ -87,6 +146,7 @@ export const migrateCompanyInformationContent = (
   void _legacyServices;
   void _legacyRefusalsTitle;
   void _legacyRefusals;
+  void _legacyIntroIcon;
 
   return withQuickLinks({
     ...COMPANY_INFORMATION_DEFAULTS,

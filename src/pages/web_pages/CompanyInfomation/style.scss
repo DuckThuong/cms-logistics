@@ -189,23 +189,23 @@ $transition-base: all 0.25s ease;
 
   &__quick-links-item {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 10px;
-    padding: 10px 12px;
+    padding: 12px;
     border-radius: 8px;
     background: $group-bg;
     border: 1px solid $group-border;
   }
 
-  &__quick-links-icon {
-    color: $lo;
-    font-size: 14px;
-    flex-shrink: 0;
+  &__quick-links-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
   }
 
   &__quick-links-label {
-    flex: 1;
-    min-width: 0;
     font-size: 13px;
     font-weight: 500;
     color: $page-text-title;
@@ -219,6 +219,54 @@ $transition-base: all 0.25s ease;
     color: $lo;
     border: 1px solid $lo-border;
     flex-shrink: 0;
+  }
+
+  &__quick-links-icon-edit {
+    width: 100%;
+  }
+
+  &__quick-links-icon-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: $page-text-body;
+  }
+
+  &__icon-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+
+    .ant-input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__icon-preview {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: $group-bg;
+    border: 1px solid $group-border;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__icon-preview-text {
+    font-size: 18px;
+    line-height: 1;
   }
 
   &__add-section-btn {

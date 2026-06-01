@@ -1,12 +1,15 @@
 export interface HighlightItem {
   id: string;
   label: string;
+  /** URL ảnh hoặc ký tự/emoji hiển thị icon */
+  icon: string;
 }
 
 export interface QuickLinkItem {
   id: string;
   label: string;
   anchor: string;
+  icon: string;
 }
 
 export interface ExtraFieldItem {

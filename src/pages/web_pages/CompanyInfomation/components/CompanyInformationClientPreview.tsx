@@ -21,6 +21,24 @@ const scrollToSection = (event: MouseEvent<HTMLAnchorElement>, anchorId: string)
   target?.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
+const renderIcon = (icon: string, className: string) => {
+  const trimmed = icon.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const isImageSrc =
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:");
+
+  if (isImageSrc) {
+    return <img src={trimmed} alt="" className={className} />;
+  }
+
+  return <span className={`${className} ${className}--text`}>{trimmed}</span>;
+};
+
 export const CompanyInformationClientPreview = ({
   content,
 }: CompanyInformationClientPreviewProps) => {
@@ -46,7 +64,8 @@ export const CompanyInformationClientPreview = ({
               <ul className="ci-client-preview__highlights">
                 {content.highlights.map((item) => (
                   <li key={item.id} className="ci-client-preview__highlight">
-                    {item.label}
+                    {renderIcon(item.icon, "ci-client-preview__highlight-icon")}
+                    <span>{item.label}</span>
                   </li>
                 ))}
               </ul>
@@ -66,7 +85,8 @@ export const CompanyInformationClientPreview = ({
                         className="ci-client-preview__quick-link"
                         onClick={(event) => scrollToSection(event, anchorId)}
                       >
-                        {link.label}
+                        {renderIcon(link.icon, "ci-client-preview__quick-link-icon")}
+                        <span>{link.label}</span>
                       </a>
                     </li>
                   );
