@@ -61,7 +61,7 @@ export const NAV_ITEMS = [
   },
   {
     label: 'Bảng giá',
-    href: ROUTER_PATH.PRICE,
+    href: ROUTER_PATH.PRICE_PUBLIC,
     icon: 'ti-receipt-2',
     children: [
       { label: 'Giá Order Hàng TQ', href: ROUTER_PATH.PRICE_ORDER, icon: 'ti-tag' },

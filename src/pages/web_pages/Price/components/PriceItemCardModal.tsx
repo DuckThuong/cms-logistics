@@ -1,42 +1,38 @@
 import { slugify } from "@/common/utils/seoUrl";
 import { Form, Input, InputNumber, Modal, Switch } from "antd";
 import { useEffect } from "react";
-import { ImageUploadField } from "../../CompanyInfomation/components/ImageUploadField";
-import type { ServiceListItem } from "../types";
+import type { PriceListItem } from "../types";
 
-export type ServiceItemModalMode = "create" | "edit";
+export type PriceItemModalMode = "create" | "edit";
 
-type ServiceItemCardModalProps = {
+type PriceItemCardModalProps = {
   open: boolean;
-  mode: ServiceItemModalMode;
-  initialValues: ServiceListItem | null;
+  mode: PriceItemModalMode;
+  initialValues: PriceListItem | null;
   nextSortIndex: number;
   onClose: () => void;
-  onSave: (item: ServiceListItem, mode: ServiceItemModalMode) => void;
+  onSave: (item: PriceListItem, mode: PriceItemModalMode) => void;
 };
 
-const newId = () => `svc-${Math.random().toString(36).slice(2, 10)}`;
+const newId = () => `price-${Math.random().toString(36).slice(2, 10)}`;
 
-export const ServiceItemCardModal = ({
+export const PriceItemCardModal = ({
   open,
   mode,
   initialValues,
   nextSortIndex,
   onClose,
   onSave,
-}: ServiceItemCardModalProps) => {
-  const [form] = Form.useForm<ServiceListItem>();
+}: PriceItemCardModalProps) => {
+  const [form] = Form.useForm<PriceListItem>();
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!open) return;
     if (mode === "create") {
       form.setFieldsValue({
         id: newId(),
-        name: "Dịch vụ",
+        name: "Bảng giá",
         shortDescription: "",
-        image: "",
         url: "",
         sortIndex: nextSortIndex,
         active: true,
@@ -55,7 +51,6 @@ export const ServiceItemCardModal = ({
         id: fields.id.trim(),
         name: fields.name.trim(),
         shortDescription: fields.shortDescription.trim(),
-        image: fields.image?.trim() ?? "",
         url: fields.url.trim() || slugify(fields.shortDescription || fields.name),
         sortIndex: fields.sortIndex,
         active: fields.active ?? true,
@@ -67,13 +62,12 @@ export const ServiceItemCardModal = ({
 
   return (
     <Modal
-      title={mode === "create" ? "Thêm dịch vụ" : "Sửa thẻ dịch vụ (hub)"}
+      title={mode === "create" ? "Thêm mục bảng giá" : "Sửa mục menu"}
       open={open}
       onCancel={onClose}
       onOk={handleSubmit}
       okText="Lưu"
       cancelText="Huỷ"
-      
       destroyOnClose
       width={640}
     >
@@ -83,25 +77,25 @@ export const ServiceItemCardModal = ({
         </Form.Item>
         <Form.Item
           name="shortDescription"
-          label="Tiêu đề card (shortDescription)"
-          rules={[{ required: true, message: "Nhập tiêu đề" }]}
+          label="Tên hiển thị (shortDescription)"
+          rules={[{ required: true, message: "Nhập tên" }]}
         >
-          <Input placeholder="Đặt hàng Trung Quốc" />
+          <Input placeholder="Giá Order Hàng TQ" />
         </Form.Item>
-        <Form.Item name="name" label="Nhãn card (name)">
-          <Input placeholder="Dịch vụ" />
+        <Form.Item name="name" label="Nhãn (name)">
+          <Input placeholder="Bảng giá" />
         </Form.Item>
-        <Form.Item name="url" label="Slug URL chi tiết">
-          <Input placeholder="dat-hang-trung-quoc" addonBefore="/dich-vu/" />
+        <Form.Item name="url" label="Slug URL">
+          <Input
+            placeholder="bang-gia-dich-vu-order-hang-trung-quoc"
+            addonBefore="/bang-gia/"
+          />
         </Form.Item>
-        <Form.Item name="sortIndex" label="Thứ tự (sortIndex)">
+        <Form.Item name="sortIndex" label="Thứ tự">
           <InputNumber min={1} style={{ width: "100%" }} />
         </Form.Item>
         <Form.Item name="active" label="Hiển thị" valuePropName="checked">
           <Switch />
-        </Form.Item>
-        <Form.Item name="image" label="Ảnh card">
-          <ImageUploadField />
         </Form.Item>
       </Form>
     </Modal>

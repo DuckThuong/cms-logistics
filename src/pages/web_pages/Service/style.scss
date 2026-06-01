@@ -22,3 +22,12 @@
     color: #0f172a !important;
   }
 }
+
+.ant-modal-footer {
+  display: flex;
+  padding: 16px 24px;
+}
+
+.ant-modal-footer .ant-btn {
+  flex: 1;
+}

@@ -45,6 +45,10 @@ export const MainLayout = () => {
       navigate(ROUTER_PATH.SERVICE);
       return;
     }
+    if (key === "price") {
+      navigate(ROUTER_PATH.PRICE);
+      return;
+    }
     navigate(path);
   };
 
