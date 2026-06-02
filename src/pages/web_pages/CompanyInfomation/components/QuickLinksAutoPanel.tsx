@@ -2,14 +2,19 @@ import type { AboutOtherOption } from "@/common/types/companyInformation";
 import { IconStringField } from "./IconStringField";
 
 type QuickLinksAutoPanelProps = {
-  links: AboutOtherOption[];
+  title?: string;
+  values?: AboutOtherOption[];
+  links?: AboutOtherOption[];
   onIconChange: (linkId: string, icon: string) => void;
 };
 
-export const QuickLinksAutoPanel = ({ links, onIconChange }: QuickLinksAutoPanelProps) => (
+export const QuickLinksAutoPanel = ({ title, values, links: linksProp, onIconChange }: QuickLinksAutoPanelProps) => {
+  const links = values ?? linksProp ?? [];
+
+  return (
   <section className="company-information-page__section-card">
     <h3 className="company-information-page__section-card-title">
-      Liên kết nhanh (otherOptions — quick-link)
+      {title ?? "Liên kết nhanh (otherOptions — quick-link)"}
     </h3>
     <p className="company-information-page__quick-links-hint">
       Tự động tạo từ intro và các section. <strong>value</strong> là nhãn hiển thị (khớp FE).
@@ -40,4 +45,5 @@ export const QuickLinksAutoPanel = ({ links, onIconChange }: QuickLinksAutoPanel
       </ul>
     )}
   </section>
-);
+  );
+};
