@@ -5,7 +5,9 @@ import type { AboutSection } from "@/common/types/companyInformation";
 import { descriptionToLines, linesToDescription } from "@/common/utils/companyInformationSection";
 
 type ServicesRefusalsEditorProps = {
-  sections: AboutSection[];
+  title?: string;
+  sections?: AboutSection[];
+  values?: AboutSection[];
   onChange: (sections: AboutSection[]) => void;
 };
 
@@ -23,9 +25,13 @@ const createEmptySection = (sortIndex: number): AboutSection => ({
 });
 
 export const ServicesRefusalsEditor = ({
-  sections,
+  title,
+  sections: sectionsProp,
+  values,
   onChange,
 }: ServicesRefusalsEditorProps) => {
+  const sections = values ?? sectionsProp ?? [];
+
   const updateSection = (index: number, nextSection: AboutSection) => {
     const next = [...sections];
     next[index] = nextSection;
@@ -75,7 +81,7 @@ export const ServicesRefusalsEditor = ({
   return (
     <section className="company-information-page__section-card">
       <h3 className="company-information-page__section-card-title">
-        Dịch vụ & Từ chối cung cấp (sections — policy)
+        {title ?? "Dịch vụ & Từ chối cung cấp (sections — policy)"}
       </h3>
 
       {sections.length === 0 ? (
@@ -106,74 +112,59 @@ export const ServicesRefusalsEditor = ({
                   <Form.Item label="Tiêu đề">
                     <Input
                       value={section.title}
-                      placeholder="Tiêu đề section"
-                      onChange={(event) => {
-                        const nextTitle = event.target.value;
+                      placeholder="VD: Terms of Service"
+                      onChange={(e) => {
+                        const title = e.target.value;
                         updateSection(sectionIndex, {
                           ...section,
-                          title: nextTitle,
-                          anchor: anchorFromTitle(nextTitle),
+                          title,
+                          anchor: anchorFromTitle(title),
                         });
                       }}
                     />
                   </Form.Item>
-                  <Form.Item label="Liên kết nhanh (anchor)">
-                    <Input
-                      value={section.anchor}
-                      placeholder="dich-vu-cung-cap"
-                      onChange={(event) =>
-                        updateSection(sectionIndex, {
-                          ...section,
-                          anchor: event.target.value,
-                        })
-                      }
-                    />
+                  <Form.Item label="Anchor (tự động)">
+                    <Input value={section.anchor} disabled />
                   </Form.Item>
                 </div>
 
-                <Form.Item label="Nội dung (description[])" className="company-information-page__content-field">
-                  <div className="company-information-page__content-rows">
-                    {descriptionToLines(section.description).map((row, rowIndex) => (
-                      <div
-                        className="company-information-page__content-row"
-                        key={`${section.id}-row-${rowIndex}`}
-                      >
-                        <Input
-                          value={row}
-                          placeholder="Nhập nội dung"
-                          onChange={(event) =>
-                            updateContentRow(sectionIndex, rowIndex, event.target.value)
-                          }
-                        />
-                        <Button
-                          type="text"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => removeContentRow(sectionIndex, rowIndex)}
-                          aria-label="Xóa dòng"
-                        />
-                        <Button
-                          type="text"
-                          icon={<PlusOutlined />}
-                          onClick={() => addContentRow(sectionIndex)}
-                          aria-label="Thêm dòng"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Form.Item>
+                <div className="company-information-page__group-row">
+                  <span className="company-information-page__group-label">
+                    Nội dung (mỗi dòng hiển thị trên FE)
+                  </span>
+                  {descriptionToLines(section.description).map((line, rowIndex) => (
+                    <div className="company-information-page__group-row-item" key={rowIndex}>
+                      <Input
+                        value={line}
+                        placeholder={`Dòng ${rowIndex + 1}`}
+                        onChange={(e) => updateContentRow(sectionIndex, rowIndex, e.target.value)}
+                      />
+                      <Button
+                        danger
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        onClick={() => removeContentRow(sectionIndex, rowIndex)}
+                        aria-label="Xóa dòng"
+                      />
+                    </div>
+                  ))}
+                  <Button
+                    type="dashed"
+                    icon={<PlusOutlined />}
+                    onClick={() => addContentRow(sectionIndex)}
+                  >
+                    Thêm dòng
+                  </Button>
+                </div>
               </Form>
             </div>
           ))}
 
-          <Button
-            type="dashed"
-            icon={<PlusOutlined />}
-            onClick={addSection}
-            className="company-information-page__add-section-btn"
-          >
-            Thêm section
-          </Button>
+          <div className="company-information-page__footer-actions">
+            <Button type="primary" icon={<PlusOutlined />} onClick={addSection}>
+              Thêm section policy
+            </Button>
+          </div>
         </>
       )}
     </section>
