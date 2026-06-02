@@ -18,7 +18,15 @@ type CompanyInformationClientPreviewProps = {
 };
 
 const toDomAnchorId = (anchor: string, fallback: string) => {
-  const slug = anchor.trim().replace(/^#/, "");
+  const slug = anchor
+    .trim()
+    .replace(/^#/, "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
   return slug || fallback;
 };
 
