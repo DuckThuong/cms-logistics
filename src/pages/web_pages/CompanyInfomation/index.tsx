@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
+﻿import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Space, message } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { anchorFromTitle } from "@/common/utils/anchor";
@@ -28,6 +28,8 @@ import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
 import { SectionsEditor } from "./components/SectionsEditor";
 import { SeoSection } from "./components/SeoSection";
+import { createPageWithSections } from "@/api/pagesApi";
+import type { AboutPagePayloadDto } from "@/api/dtos/about.response";
 import type { CompanyInformationContent } from "@/common/types/companyInformation";
 import "./style.scss";
 
@@ -143,10 +145,43 @@ export const CompanyInformationPage = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const payload = normalizeCompanyInformationContent(content);
-      localStorage.setItem("cms.company-information.about", JSON.stringify(payload));
-      setContent(payload);
-      messageApi.success("Đã lưu nội dung Company Information (kèm SEO URL).");
+      const normalized = normalizeCompanyInformationContent(content);
+
+      // Map CompanyInformationContent → AboutPagePayloadDto
+      const payload: AboutPagePayloadDto = {
+        name: normalized.pageTitle || "Company Information",
+        url: normalized.seoUrl || "/about",
+        shortDescription: normalized.pageSubtitle || "",
+        content: normalized.intro?.content || "",
+        otherOptions: (normalized.otherOptions || []).map((opt) => ({
+          icon: opt.icon || "",
+          type: opt.type || "options",
+          value: opt.value || "",
+        })),
+        sections: (normalized.sections || [])
+          .filter((s) => s.active)
+          .map((s, idx) => ({
+            title: s.title || "",
+            description: (s.description || []).map((d) => ({
+              icon: d.icon || "",
+              text: d.text || "",
+            })),
+            images: s.images || [],
+            sortIndex: s.sortIndex ?? idx + 1,
+            active: s.active ?? true,
+          })),
+      };
+
+      // Gọi API tạo page + sections
+      const result = await createPageWithSections(payload);
+
+      // Lưu localStorage như backup
+      localStorage.setItem("cms.company-information.about", JSON.stringify(normalized));
+      setContent(normalized);
+      messageApi.success(`Đã lưu thành công! Page ID: ${result.id}`);
+    } catch (error: any) {
+      console.error("Save failed:", error);
+      messageApi.error(error?.response?.data?.message || "Lưu thất bại. Vui lòng thử lại.");
     } finally {
       setIsSaving(false);
     }
@@ -256,17 +291,8 @@ export const CompanyInformationPage = () => {
                   }}
                 />
               </Form.Item>
-              <Form.Item label="Liên kết nhanh (anchor)">
-                <Input
-                  value={content.intro.anchor}
-                  placeholder="gioi-thieu-tong-quan"
-                  onChange={(event) =>
-                    setContent((prev) => ({
-                      ...prev,
-                      intro: { ...prev.intro, anchor: event.target.value },
-                    }))
-                  }
-                />
+              <Form.Item label="Anchor">
+                <Input value={content.intro.anchor} disabled />
               </Form.Item>
             </div>
             <Form.Item label="Nội dung">
@@ -281,51 +307,53 @@ export const CompanyInformationPage = () => {
                 }
               />
             </Form.Item>
-            <Form.Item label="Ảnh minh hoạ (imageUrl)">
-              <ImageUploadField
-                value={content.intro.imageUrl}
-                onChange={(nextValue) =>
-                  setContent((prev) => ({
-                    ...prev,
-                    intro: { ...prev.intro, imageUrl: nextValue },
-                  }))
-                }
-              />
-            </Form.Item>
+            <ImageUploadField
+              label="Ảnh giới thiệu"
+              value={content.intro.imageUrl}
+              onChange={(url) =>
+                setContent((prev) => ({
+                  ...prev,
+                  intro: { ...prev.intro, imageUrl: url },
+                }))
+              }
+            />
           </Form>
         </section>
 
         <HighlightListEditor
+          title="Điểm nổi bật (Highlights)"
           values={highlightOptions}
           onChange={handleHighlightChange}
         />
 
-        <ServicesRefusalsEditor
-          sections={policySections}
-          onChange={updatePolicySections}
+        <QuickLinksAutoPanel
+          title="Quick Links"
+          values={quickLinkOptions}
+          onIconChange={handleQuickLinkIconChange}
         />
 
         <SectionsEditor
-          title="Các khối nội dung tuỳ biến (sections — content)"
+          title="Khối Chính sách (Policy)"
+          values={policySections}
+          onChange={updatePolicySections}
+        />
+
+        <ServicesRefusalsEditor
+          title="Dịch vụ & Từ chối"
           values={contentSections}
           onChange={updateContentSections}
         />
 
-        <QuickLinksAutoPanel
-          links={quickLinkOptions}
-          onIconChange={handleQuickLinkIconChange}
-        />
-
         <section className="company-information-page__section-card">
-          <h3>Lời kết (sections — closing)</h3>
+          <h3>Đoạn kết (Closing)</h3>
           <Form layout="vertical">
-            <Form.Item label="Dòng 1 (description[0])">
+            <Form.Item label="Dòng 1">
               <Input
                 value={closingLineOne}
                 onChange={(event) => updateClosing(event.target.value, closingLineTwo)}
               />
             </Form.Item>
-            <Form.Item label="Dòng 2 (description[1])">
+            <Form.Item label="Dòng 2">
               <Input
                 value={closingLineTwo}
                 onChange={(event) => updateClosing(closingLineOne, event.target.value)}
@@ -333,21 +361,24 @@ export const CompanyInformationPage = () => {
             </Form.Item>
           </Form>
         </section>
-      </Space>
 
-      <div className="company-information-page__bottom-actions">
-        <Button icon={<EyeOutlined />} onClick={() => setViewMode("client")}>
-          Xem trước Client
-        </Button>
-        <Button
-          type="primary"
-          icon={<SaveOutlined />}
-          loading={isSaving}
-          onClick={handleSave}
-        >
-          Lưu thay đổi
-        </Button>
-      </div>
+        <div className="company-information-page__actions">
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => setViewMode("client")}
+          >
+            Xem trước
+          </Button>
+          <Button
+            type="primary"
+            icon={<SaveOutlined />}
+            loading={isSaving}
+            onClick={handleSave}
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
+      </Space>
     </div>
   );
 };
