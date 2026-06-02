@@ -1,6 +1,6 @@
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Input, Space, Tag, Tooltip } from "antd";
-import type { PriceDetailSection, PriceSectionDescription } from "../types";
+import type { PriceDetailSection, PriceSectionDescription } from "@/common/types/price";
 import { PriceTableGridEditor } from "./PriceTableGridEditor";
 
 const newDescId = () => `desc-${Math.random().toString(36).slice(2, 10)}`;

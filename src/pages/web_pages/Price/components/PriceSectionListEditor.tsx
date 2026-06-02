@@ -1,8 +1,8 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import { useState } from "react";
-import { ensureDescription } from "../migrateContent";
-import type { PriceDetailSection } from "../types";
+import { ensureDescription } from "@/common/contexts/priceMigrate";
+import type { PriceDetailSection } from "@/common/types/price";
 import {
   PriceAddSectionModal,
   type PriceAddSectionFormValues,

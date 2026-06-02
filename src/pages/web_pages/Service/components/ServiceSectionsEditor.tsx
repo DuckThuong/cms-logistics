@@ -2,7 +2,7 @@ import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Space, Switch } from "antd";
 import { useState, type ReactNode } from "react";
 import { SectionCardHeader } from "../../CompanyInfomation/components/SectionCardHeader";
-import type { ServiceDetailSection, ServiceSectionDescription } from "../types";
+import type { ServiceDetailSection, ServiceSectionDescription } from "@/common/types/service";
 
 type ServiceSectionsEditorProps = {
   values: ServiceDetailSection[];

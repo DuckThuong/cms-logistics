@@ -1,7 +1,7 @@
 import { slugify } from "@/common/utils/seoUrl";
 import { Form, Input, InputNumber, Modal, Switch } from "antd";
 import { useEffect } from "react";
-import type { PriceListItem } from "../types";
+import type { PriceListItem } from "@/common/types/price";
 
 export type PriceItemModalMode = "create" | "edit";
 

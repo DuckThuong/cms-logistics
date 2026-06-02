@@ -1,4 +1,4 @@
-import type { PriceDetailSection } from "../types";
+import type { PriceDetailSection } from "@/common/types/price";
 
 export type SectionVariant =
   | "main-title"

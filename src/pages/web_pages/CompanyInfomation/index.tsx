@@ -3,18 +3,32 @@ import { Button, Form, Input, Space, message } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { anchorFromTitle } from "@/common/utils/anchor";
 import { normalizeSeoUrl } from "@/common/utils/seoUrl";
-import { COMPANY_INFORMATION_DEFAULTS } from "./constants";
-import { migrateCompanyInformationContent } from "./migrateContent";
+import { COMPANY_INFORMATION_DEFAULTS } from "@/common/constants/companyInformation";
+import { migrateCompanyInformationContent } from "@/common/contexts/companyInformationMigrate";
+import { normalizeCompanyInformationContent } from "@/common/contexts/companyInformationNormalize";
+import {
+  getHighlightOptions,
+  getQuickLinkOptions,
+  replaceHighlightOptions,
+  syncOtherOptions,
+  updateQuickLinkIcon,
+} from "@/common/utils/companyInformationOtherOptions";
+import {
+  filterSectionsByKind,
+  getClosingLines,
+  reindexSections,
+  replaceSectionsByKind,
+  upsertClosingSection,
+} from "@/common/utils/companyInformationSection";
 import { CompanyInformationClientPreview } from "./components/CompanyInformationClientPreview";
 import { ExtraFieldsEditor } from "./components/ExtraFieldsEditor";
 import { HighlightListEditor } from "./components/HighlightListEditor";
 import { ImageUploadField } from "./components/ImageUploadField";
 import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
-import { deriveQuickLinks, mergeQuickLinkIcons } from "./deriveQuickLinks";
 import { SectionsEditor } from "./components/SectionsEditor";
 import { SeoSection } from "./components/SeoSection";
-import type { CompanyInformationContent } from "./types";
+import type { CompanyInformationContent } from "@/common/types/companyInformation";
 import "./style.scss";
 
 const { TextArea } = Input;
@@ -36,7 +50,7 @@ export const CompanyInformationPage = () => {
     }
     try {
       const parsedData = JSON.parse(savedData) as CompanyInformationContent;
-      setContent(migrateCompanyInformationContent(parsedData));
+      setContent(migrateCompanyInformationContent(parsedData as any));
     } catch {
       messageApi.warning("Không thể đọc dữ liệu đã lưu trước đó.");
     }
@@ -57,38 +71,79 @@ export const CompanyInformationPage = () => {
     }));
   };
 
-  const derivedQuickLinks = useMemo(
-    () => mergeQuickLinkIcons(deriveQuickLinks(content), content.quickLinks),
-    [
-      content.introTitle,
-      content.introAnchor,
-      content.policySections,
-      content.sections,
-      content.quickLinks,
-    ],
+  const policySections = useMemo(
+    () => filterSectionsByKind(content.sections, "policy"),
+    [content.sections],
   );
 
-  const handleQuickLinkIconChange = (linkId: string, icon: string) => {
-    const merged = mergeQuickLinkIcons(deriveQuickLinks(content), content.quickLinks);
+  const contentSections = useMemo(
+    () => filterSectionsByKind(content.sections, "content"),
+    [content.sections],
+  );
+
+  const [closingLineOne, closingLineTwo] = useMemo(
+    () => getClosingLines(content.sections),
+    [content.sections],
+  );
+
+  const syncedOtherOptions = useMemo(
+    () => syncOtherOptions(content),
+    [content.intro, content.sections, content.otherOptions],
+  );
+
+  const highlightOptions = useMemo(
+    () => getHighlightOptions(syncedOtherOptions),
+    [syncedOtherOptions],
+  );
+
+  const quickLinkOptions = useMemo(
+    () => getQuickLinkOptions(syncedOtherOptions),
+    [syncedOtherOptions],
+  );
+
+  const contentForPreview = useMemo(
+    () =>
+      normalizeCompanyInformationContent({
+        ...content,
+        seoUrl: normalizedSeoUrl,
+        otherOptions: syncedOtherOptions,
+      }),
+    [content, normalizedSeoUrl, syncedOtherOptions],
+  );
+
+  const updatePolicySections = (nextPolicy: typeof policySections) => {
     updateField(
-      "quickLinks",
-      merged.map((link) => (link.id === linkId ? { ...link, icon } : link)),
+      "sections",
+      reindexSections(replaceSectionsByKind(content.sections, "policy", nextPolicy)),
     );
   };
 
-  const contentForPreview = useMemo(
-    () => ({ ...content, seoUrl: normalizedSeoUrl, quickLinks: derivedQuickLinks }),
-    [content, normalizedSeoUrl, derivedQuickLinks],
-  );
+  const updateContentSections = (nextContent: typeof contentSections) => {
+    updateField(
+      "sections",
+      reindexSections(replaceSectionsByKind(content.sections, "content", nextContent)),
+    );
+  };
+
+  const updateClosing = (lineOne: string, lineTwo: string) => {
+    updateField("sections", reindexSections(upsertClosingSection(content.sections, lineOne, lineTwo)));
+  };
+
+  const handleHighlightChange = (highlights: typeof highlightOptions) => {
+    updateField("otherOptions", replaceHighlightOptions(content.otherOptions, highlights));
+  };
+
+  const handleQuickLinkIconChange = (linkId: string, icon: string) => {
+    updateField(
+      "otherOptions",
+      updateQuickLinkIcon(syncOtherOptions(content), linkId, icon),
+    );
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const payload: CompanyInformationContent = {
-        ...content,
-        seoUrl: normalizeSeoUrl(content.seoUrl),
-        quickLinks: mergeQuickLinkIcons(deriveQuickLinks(content), content.quickLinks),
-      };
+      const payload = normalizeCompanyInformationContent(content);
       localStorage.setItem("cms.company-information.about", JSON.stringify(payload));
       setContent(payload);
       messageApi.success("Đã lưu nội dung Company Information (kèm SEO URL).");
@@ -151,19 +206,19 @@ export const CompanyInformationPage = () => {
         <section className="company-information-page__section-card">
           <h3>Nội dung Banner</h3>
           <Form layout="vertical">
-            <Form.Item label="Nhãn">
+            <Form.Item label="Nhãn (shortDescription)">
               <Input
                 value={content.pageTag}
                 onChange={(event) => updateField("pageTag", event.target.value)}
               />
             </Form.Item>
-            <Form.Item label="Tiêu đề">
+            <Form.Item label="Tiêu đề (name)">
               <Input
                 value={content.pageTitle}
                 onChange={(event) => updateField("pageTitle", event.target.value)}
               />
             </Form.Item>
-            <Form.Item label="Mô tả">
+            <Form.Item label="Mô tả (content)">
               <TextArea
                 value={content.pageSubtitle}
                 rows={3}
@@ -182,88 +237,98 @@ export const CompanyInformationPage = () => {
         />
 
         <section className="company-information-page__section-card">
-          <h3>Khối Giới thiệu</h3>
+          <h3>Khối Giới thiệu (intro)</h3>
           <Form layout="vertical">
             <div className="company-information-page__inline-grid">
               <Form.Item label="Tiêu đề">
                 <Input
-                  value={content.introTitle}
+                  value={content.intro.title}
                   onChange={(event) => {
                     const nextTitle = event.target.value;
                     setContent((prev) => ({
                       ...prev,
-                      introTitle: nextTitle,
-                      introAnchor: anchorFromTitle(nextTitle),
+                      intro: {
+                        ...prev.intro,
+                        title: nextTitle,
+                        anchor: anchorFromTitle(nextTitle),
+                      },
                     }));
                   }}
                 />
               </Form.Item>
-              <Form.Item label="Liên kết nhanh">
+              <Form.Item label="Liên kết nhanh (anchor)">
                 <Input
-                  value={content.introAnchor}
+                  value={content.intro.anchor}
                   placeholder="gioi-thieu-tong-quan"
                   onChange={(event) =>
-                    updateField("introAnchor", event.target.value)
+                    setContent((prev) => ({
+                      ...prev,
+                      intro: { ...prev.intro, anchor: event.target.value },
+                    }))
                   }
                 />
               </Form.Item>
             </div>
             <Form.Item label="Nội dung">
               <TextArea
-                value={content.introContent}
+                value={content.intro.content}
                 rows={4}
                 onChange={(event) =>
-                  updateField("introContent", event.target.value)
+                  setContent((prev) => ({
+                    ...prev,
+                    intro: { ...prev.intro, content: event.target.value },
+                  }))
                 }
               />
             </Form.Item>
-            <Form.Item label="Ảnh minh hoạ">
+            <Form.Item label="Ảnh minh hoạ (imageUrl)">
               <ImageUploadField
-                value={content.introImageUrl}
-                onChange={(nextValue) => updateField("introImageUrl", nextValue)}
+                value={content.intro.imageUrl}
+                onChange={(nextValue) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    intro: { ...prev.intro, imageUrl: nextValue },
+                  }))
+                }
               />
             </Form.Item>
           </Form>
         </section>
 
         <HighlightListEditor
-          values={content.highlights}
-          onChange={(nextValues) => updateField("highlights", nextValues)}
+          values={highlightOptions}
+          onChange={handleHighlightChange}
         />
 
         <ServicesRefusalsEditor
-          sections={content.policySections}
-          onChange={(nextSections) => updateField("policySections", nextSections)}
+          sections={policySections}
+          onChange={updatePolicySections}
         />
 
         <SectionsEditor
-          title="Các khối nội dung tuỳ biến"
-          values={content.sections}
-          onChange={(nextValues) => updateField("sections", nextValues)}
+          title="Các khối nội dung tuỳ biến (sections — content)"
+          values={contentSections}
+          onChange={updateContentSections}
         />
 
         <QuickLinksAutoPanel
-          links={derivedQuickLinks}
+          links={quickLinkOptions}
           onIconChange={handleQuickLinkIconChange}
         />
 
         <section className="company-information-page__section-card">
-          <h3>Lời kết</h3>
+          <h3>Lời kết (sections — closing)</h3>
           <Form layout="vertical">
-            <Form.Item label="Dòng 1">
+            <Form.Item label="Dòng 1 (description[0])">
               <Input
-                value={content.closingLineOne}
-                onChange={(event) =>
-                  updateField("closingLineOne", event.target.value)
-                }
+                value={closingLineOne}
+                onChange={(event) => updateClosing(event.target.value, closingLineTwo)}
               />
             </Form.Item>
-            <Form.Item label="Dòng 2">
+            <Form.Item label="Dòng 2 (description[1])">
               <Input
-                value={content.closingLineTwo}
-                onChange={(event) =>
-                  updateField("closingLineTwo", event.target.value)
-                }
+                value={closingLineTwo}
+                onChange={(event) => updateClosing(closingLineOne, event.target.value)}
               />
             </Form.Item>
           </Form>

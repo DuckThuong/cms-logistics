@@ -16,8 +16,8 @@ import "../style.scss";
 import type {
   PriceDetailSection,
   PriceSectionDescription,
-} from "../types";
-import { ensureDescription } from "../migrateContent";
+} from "@/common/types/price";
+import { ensureDescription } from "@/common/contexts/priceMigrate";
 
 type PriceSectionsEditorProps = {
   values: PriceDetailSection[];

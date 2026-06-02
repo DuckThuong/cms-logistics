@@ -8,9 +8,9 @@ import { ROUTER_PATH } from "@/routers/Route";
 import { PriceDetailClientPreview } from "../components/PriceDetailClientPreview";
 import { PriceOtherOptionsEditor } from "../components/PriceOtherOptionsEditor";
 import { PriceSectionListEditor } from "../components/PriceSectionListEditor";
-import { migratePriceDetail } from "../migrateContent";
+import { migratePriceDetail } from "@/common/contexts/priceMigrate";
 import { loadPriceDetail, loadPriceHub, savePriceDetail } from "../storage";
-import type { PriceDetailContent, PriceListItem } from "../types";
+import type { PriceDetailContent, PriceListItem } from "@/common/types/price";
 import "../../CompanyInfomation/style.scss";
 import "../style.scss";
 

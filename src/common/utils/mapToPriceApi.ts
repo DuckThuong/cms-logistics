@@ -1,11 +1,14 @@
-import type { PricePageApiPayload, PriceApiSectionDescription } from "./apiTypes";
+import type {
+  SectionDescriptionDto,
+  ServiceByIdResponseDto,
+} from "@/api/dtos/priceResponse.dto";
 import type {
   PriceDetailContent,
   PriceDetailSection,
   PriceListItem,
   PriceOtherOption,
   PriceSectionDescription,
-} from "./types";
+} from "@/common/types/price";
 
 const parseNumericId = (id: string): number => {
   const digits = id.replace(/\D/g, "");
@@ -25,7 +28,7 @@ export const mapOtherOptionToApi = (opt: PriceOtherOption) => ({
 
 export const mapSectionDescriptionToApi = (
   desc: PriceSectionDescription,
-): PriceApiSectionDescription => {
+): SectionDescriptionDto => {
   if (desc.type === "table") {
     return {
       type: "table",
@@ -50,7 +53,7 @@ export const mapSectionDescriptionToApi = (
 export const mapSectionToApi = (
   section: PriceDetailSection,
   page: PriceDetailContent,
-): PricePageApiPayload["sections"][number] => {
+): ServiceByIdResponseDto["sections"][number] => {
   const timestamp = page.updatedAt || new Date().toISOString();
   return {
     id: parseNumericId(section.id),
@@ -70,11 +73,11 @@ export type MapPriceDetailOptions = {
   listItem?: PriceListItem;
 };
 
-/** Chuyển nội dung CMS → payload khớp priceResponse.dto (ServiceByIdResponseDto) */
+/** Chuyển nội dung CMS → payload khớp `ServiceByIdResponseDto`. */
 export const mapPriceDetailToApi = (
   detail: PriceDetailContent,
   options: MapPriceDetailOptions = {},
-): PricePageApiPayload => {
+): ServiceByIdResponseDto => {
   const { listItem } = options;
   const updatedAt = detail.updatedAt || new Date().toISOString();
 

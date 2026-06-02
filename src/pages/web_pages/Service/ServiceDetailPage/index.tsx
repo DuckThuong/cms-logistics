@@ -7,9 +7,9 @@ import { ROUTER_PATH } from "@/routers/Route";
 import { ImageUploadField } from "../../CompanyInfomation/components/ImageUploadField";
 import { ServiceDetailClientPreview } from "../components/ServiceDetailClientPreview";
 import { ServiceSectionsEditor } from "../components/ServiceSectionsEditor";
-import { migrateServiceDetail } from "../migrateContent";
+import { migrateServiceDetail } from "@/common/contexts/serviceMigrate";
 import { loadServiceDetail, loadServiceHub, saveServiceDetail } from "../storage";
-import type { ServiceDetailContent } from "../types";
+import type { ServiceDetailContent } from "@/common/types/service";
 import "../../CompanyInfomation/style.scss";
 
 type ViewMode = "cms" | "client";

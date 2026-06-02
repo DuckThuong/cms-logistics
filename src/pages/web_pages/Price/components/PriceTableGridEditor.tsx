@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Input, Tag, Tooltip } from "antd";
 import { useMemo } from "react";
-import type { PriceTableCell } from "../types";
+import type { PriceTableCell } from "@/common/types/price";
 import {
   addMatrixColumn,
   addMatrixRow,

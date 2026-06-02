@@ -1,5 +1,13 @@
-import type { PriceDetailContent, PriceDetailSection, PriceHubContent, PriceListItem, PriceOtherOption, PriceSectionDescription, PriceTableCell } from "@/common/types/price";
 import { slugify } from "@/common/utils/seoUrl";
+import type {
+  PriceDetailContent,
+  PriceDetailSection,
+  PriceHubContent,
+  PriceListItem,
+  PriceOtherOption,
+  PriceSectionDescription,
+  PriceTableCell,
+} from "@/common/types/price";
 
 const newId = (prefix: string) =>
   `${prefix}-${Math.random().toString(36).slice(2, 10)}`;

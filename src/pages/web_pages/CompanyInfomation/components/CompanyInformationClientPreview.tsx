@@ -1,7 +1,16 @@
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Tag } from "antd";
 import type { MouseEvent } from "react";
-import type { CompanyInformationContent } from "../types";
+import {
+  descriptionToLines,
+  filterSectionsByKind,
+  getClosingLines,
+} from "@/common/utils/companyInformationSection";
+import {
+  getHighlightOptions,
+  getQuickLinkOptions,
+} from "@/common/utils/companyInformationOtherOptions";
+import type { CompanyInformationContent } from "@/common/types/companyInformation";
 import "./CompanyInformationClientPreview.scss";
 
 type CompanyInformationClientPreviewProps = {
@@ -42,7 +51,12 @@ const renderIcon = (icon: string, className: string) => {
 export const CompanyInformationClientPreview = ({
   content,
 }: CompanyInformationClientPreviewProps) => {
-  const introAnchorId = toDomAnchorId(content.introAnchor, "gioi-thieu");
+  const introAnchorId = toDomAnchorId(content.intro.anchor, "gioi-thieu");
+  const highlights = getHighlightOptions(content.otherOptions);
+  const quickLinks = getQuickLinkOptions(content.otherOptions);
+  const policySections = filterSectionsByKind(content.sections, "policy");
+  const contentSections = filterSectionsByKind(content.sections, "content");
+  const [closingLineOne, closingLineTwo] = getClosingLines(content.sections);
 
   return (
     <div className="ci-client-preview">
@@ -60,24 +74,34 @@ export const CompanyInformationClientPreview = ({
               <p className="ci-client-preview__subtitle">{content.pageSubtitle}</p>
             ) : null}
 
-            {content.highlights.length > 0 ? (
+            {highlights.length > 0 ? (
               <ul className="ci-client-preview__highlights">
-                {content.highlights.map((item) => (
+                {highlights.map((item) => (
                   <li key={item.id} className="ci-client-preview__highlight">
                     {renderIcon(item.icon, "ci-client-preview__highlight-icon")}
-                    <span>{item.label}</span>
+                    <span>{item.value}</span>
                   </li>
                 ))}
               </ul>
             ) : null}
           </div>
 
-          {content.quickLinks.length > 0 ? (
+          {quickLinks.length > 0 ? (
             <nav className="ci-client-preview__quick-nav" aria-label="Điều hướng nhanh">
               <span className="ci-client-preview__quick-nav-label">Xem nhanh</span>
               <ul className="ci-client-preview__quick-links">
-                {content.quickLinks.map((link) => {
-                  const anchorId = toDomAnchorId(link.anchor, link.id);
+                {quickLinks.map((link) => {
+                  const anchorId =
+                    link.id === "intro"
+                      ? toDomAnchorId(content.intro.anchor, link.id)
+                      : (() => {
+                          const section = [...policySections, ...contentSections].find(
+                            (item) => item.id === link.id,
+                          );
+                          return section
+                            ? toDomAnchorId(section.anchor, link.id)
+                            : toDomAnchorId(link.value, link.id);
+                        })();
                   return (
                     <li key={link.id}>
                       <a
@@ -86,7 +110,7 @@ export const CompanyInformationClientPreview = ({
                         onClick={(event) => scrollToSection(event, anchorId)}
                       >
                         {renderIcon(link.icon, "ci-client-preview__quick-link-icon")}
-                        <span>{link.label}</span>
+                        <span>{link.value}</span>
                       </a>
                     </li>
                   );
@@ -104,20 +128,20 @@ export const CompanyInformationClientPreview = ({
         >
           <div className="ci-client-preview__intro-text">
             <p>
-              {content.introTitle ? <strong>{content.introTitle} </strong> : null}
-              {content.introContent}
+              {content.intro.title ? <strong>{content.intro.title} </strong> : null}
+              {content.intro.content}
             </p>
           </div>
-          {content.introImageUrl ? (
+          {content.intro.imageUrl ? (
             <div className="ci-client-preview__intro-image">
-              <img src={content.introImageUrl} alt={content.introTitle || "Giới thiệu"} />
+              <img src={content.intro.imageUrl} alt={content.intro.title || "Giới thiệu"} />
             </div>
           ) : null}
         </section>
 
-        {content.policySections.map((section, index) => {
+        {policySections.map((section, index) => {
           const anchorId = toDomAnchorId(section.anchor, section.id);
-          const lines = section.content.filter((line) => line.trim());
+          const lines = descriptionToLines(section.description).filter((line) => line.trim());
           if (!section.title.trim() && lines.length === 0) {
             return null;
           }
@@ -152,9 +176,10 @@ export const CompanyInformationClientPreview = ({
           );
         })}
 
-        {content.sections.map((section) => {
+        {contentSections.map((section) => {
           const anchorId = toDomAnchorId(section.anchor, section.id);
-          if (!section.title.trim() && !section.description && !section.content) {
+          const lead = section.description[0]?.text ?? "";
+          if (!section.title.trim() && !lead && !section.body) {
             return null;
           }
 
@@ -165,31 +190,29 @@ export const CompanyInformationClientPreview = ({
               className="ci-client-preview__section ci-client-preview__section--custom ci-client-preview__anchor-target"
             >
               <h2 className="ci-client-preview__section-title">{section.title}</h2>
-              {section.description ? (
-                <p className="ci-client-preview__section-desc">{section.description}</p>
+              {lead ? <p className="ci-client-preview__section-desc">{lead}</p> : null}
+              {section.body ? (
+                <div className="ci-client-preview__section-content">{section.body}</div>
               ) : null}
-              {section.content ? (
-                <div className="ci-client-preview__section-content">{section.content}</div>
-              ) : null}
-              {section.imageUrl ? (
+              {section.images[0] ? (
                 <div className="ci-client-preview__section-image">
-                  <img src={section.imageUrl} alt={section.title} />
+                  <img src={section.images[0]} alt={section.title} />
                 </div>
               ) : null}
             </section>
           );
         })}
 
-        {(content.closingLineOne || content.closingLineTwo) && (
+        {(closingLineOne || closingLineTwo) && (
           <div className="ci-client-preview__closing">
-            {content.closingLineOne ? (
+            {closingLineOne ? (
               <p>
-                <strong>{content.closingLineOne}</strong>
+                <strong>{closingLineOne}</strong>
               </p>
             ) : null}
-            {content.closingLineTwo ? (
+            {closingLineTwo ? (
               <p>
-                <strong>{content.closingLineTwo}</strong>
+                <strong>{closingLineTwo}</strong>
               </p>
             ) : null}
           </div>

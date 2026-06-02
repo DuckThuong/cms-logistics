@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Collapse, Space, Table, Tag, Tooltip } from "antd";
 import type { ReactNode } from "react";
-import type { PriceListItem } from "../types";
+import type { PriceListItem } from "@/common/types/price";
 
 type PriceListPanelProps = {
   items: PriceListItem[];

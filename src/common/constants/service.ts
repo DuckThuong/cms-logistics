@@ -1,4 +1,4 @@
-import type { ServiceDetailContent, ServiceHubContent } from "./types";
+import type { ServiceDetailContent, ServiceHubContent } from "@/common/types/service";
 
 const orderSections = [
   {

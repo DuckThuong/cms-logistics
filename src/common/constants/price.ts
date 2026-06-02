@@ -1,4 +1,4 @@
-import type { PriceDetailContent, PriceHubContent } from "./types";
+import type { PriceDetailContent, PriceHubContent } from "@/common/types/price";
 
 const orderSections: PriceDetailContent["sections"] = [
   {

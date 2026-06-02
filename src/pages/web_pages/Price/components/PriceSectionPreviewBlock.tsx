@@ -1,7 +1,7 @@
 import { Alert, Table, Typography } from "antd";
 import { buildPriceAntdTable } from "../utils/buildPriceTable";
 import { getPriceSectionVariant } from "../utils/sectionVariant";
-import type { PriceDetailSection, PriceSectionDescription } from "../types";
+import type { PriceDetailSection, PriceSectionDescription } from "@/common/types/price";
 
 const { Title, Paragraph } = Typography;
 

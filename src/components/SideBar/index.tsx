@@ -145,7 +145,7 @@ const AppSidebar = ({
 }: AppSidebarProps) => (
   <>
     <aside className={`app-sidebar ${collapsed ? "collapsed" : ""}`}>
-      <SidebarLogo collapsed={collapsed} />
+      {/* <SidebarLogo collapsed={collapsed} /> */}
 
       <nav className="sidebar-menu">
         {menuGroups.map((group, idx) => (

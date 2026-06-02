@@ -1,6 +1,6 @@
 import { AppstoreOutlined, HomeOutlined } from "@ant-design/icons";
 import { Breadcrumb, Tag } from "antd";
-import type { ServiceHubContent } from "../types";
+import type { ServiceHubContent } from "@/common/types/service";
 import "./ServiceHubClientPreview.scss";
 
 type ServiceHubClientPreviewProps = {

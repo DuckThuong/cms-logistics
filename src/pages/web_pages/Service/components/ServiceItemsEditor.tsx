@@ -2,7 +2,7 @@ import { slugify } from "@/common/utils/seoUrl";
 import { Form, Input, InputNumber, Modal, Switch } from "antd";
 import { useEffect } from "react";
 import { ImageUploadField } from "../../CompanyInfomation/components/ImageUploadField";
-import type { ServiceListItem } from "../types";
+import type { ServiceListItem } from "@/common/types/service";
 
 export type ServiceItemModalMode = "create" | "edit";
 

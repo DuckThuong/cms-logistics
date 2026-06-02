@@ -1,27 +1,32 @@
 import { anchorFromTitle } from "@/common/utils/anchor";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input } from "antd";
-import type { TitledContentSection } from "../types";
+import type { AboutSection } from "@/common/types/companyInformation";
+import { descriptionToLines, linesToDescription } from "@/common/utils/companyInformationSection";
 
 type ServicesRefusalsEditorProps = {
-  sections: TitledContentSection[];
-  onChange: (sections: TitledContentSection[]) => void;
+  sections: AboutSection[];
+  onChange: (sections: AboutSection[]) => void;
 };
 
 const newSectionId = () => `policy-${Math.random().toString(36).slice(2, 10)}`;
 
-const createEmptySection = (): TitledContentSection => ({
+const createEmptySection = (sortIndex: number): AboutSection => ({
   id: newSectionId(),
+  sortIndex,
+  kind: "policy",
+  active: true,
   title: "",
   anchor: "",
-  content: [""],
+  description: linesToDescription([""]),
+  images: [],
 });
 
 export const ServicesRefusalsEditor = ({
   sections,
   onChange,
 }: ServicesRefusalsEditorProps) => {
-  const updateSection = (index: number, nextSection: TitledContentSection) => {
+  const updateSection = (index: number, nextSection: AboutSection) => {
     const next = [...sections];
     next[index] = nextSection;
     onChange(next);
@@ -32,40 +37,45 @@ export const ServicesRefusalsEditor = ({
   };
 
   const addSection = () => {
-    onChange([...sections, createEmptySection()]);
+    const maxSort = sections.reduce((max, section) => Math.max(max, section.sortIndex), 1);
+    onChange([...sections, createEmptySection(maxSort + 1)]);
   };
 
   const updateContentRow = (sectionIndex: number, rowIndex: number, value: string) => {
     const section = sections[sectionIndex];
-    const content = [...section.content];
-    content[rowIndex] = value;
-    updateSection(sectionIndex, { ...section, content });
+    const lines = descriptionToLines(section.description);
+    lines[rowIndex] = value;
+    updateSection(sectionIndex, {
+      ...section,
+      description: linesToDescription(lines),
+    });
   };
 
   const addContentRow = (sectionIndex: number) => {
     const section = sections[sectionIndex];
     updateSection(sectionIndex, {
       ...section,
-      content: [...section.content, ""],
+      description: linesToDescription([...descriptionToLines(section.description), ""]),
     });
   };
 
   const removeContentRow = (sectionIndex: number, rowIndex: number) => {
     const section = sections[sectionIndex];
-    if (section.content.length <= 1) {
-      updateSection(sectionIndex, { ...section, content: [""] });
+    const lines = descriptionToLines(section.description);
+    if (lines.length <= 1) {
+      updateSection(sectionIndex, { ...section, description: linesToDescription([""]) });
       return;
     }
     updateSection(sectionIndex, {
       ...section,
-      content: section.content.filter((_, idx) => idx !== rowIndex),
+      description: linesToDescription(lines.filter((_, idx) => idx !== rowIndex)),
     });
   };
 
   return (
     <section className="company-information-page__section-card">
       <h3 className="company-information-page__section-card-title">
-        Dịch vụ & Từ chối cung cấp
+        Dịch vụ & Từ chối cung cấp (sections — policy)
       </h3>
 
       {sections.length === 0 ? (
@@ -107,7 +117,7 @@ export const ServicesRefusalsEditor = ({
                       }}
                     />
                   </Form.Item>
-                  <Form.Item label="Liên kết nhanh">
+                  <Form.Item label="Liên kết nhanh (anchor)">
                     <Input
                       value={section.anchor}
                       placeholder="dich-vu-cung-cap"
@@ -121,9 +131,9 @@ export const ServicesRefusalsEditor = ({
                   </Form.Item>
                 </div>
 
-                <Form.Item label="Nội dung" className="company-information-page__content-field">
+                <Form.Item label="Nội dung (description[])" className="company-information-page__content-field">
                   <div className="company-information-page__content-rows">
-                    {section.content.map((row, rowIndex) => (
+                    {descriptionToLines(section.description).map((row, rowIndex) => (
                       <div
                         className="company-information-page__content-row"
                         key={`${section.id}-row-${rowIndex}`}

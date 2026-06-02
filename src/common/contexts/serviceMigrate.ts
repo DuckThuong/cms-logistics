@@ -5,7 +5,7 @@ import type {
   ServiceHubContent,
   ServiceListItem,
   ServiceSectionDescription,
-} from "./types";
+} from "@/common/types/service";
 
 const newId = (prefix: string) =>
   `${prefix}-${Math.random().toString(36).slice(2, 10)}`;

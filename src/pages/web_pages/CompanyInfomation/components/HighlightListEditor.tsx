@@ -1,20 +1,23 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Space } from "antd";
 import { useState } from "react";
-import type { HighlightItem } from "../types";
+import {
+  ABOUT_OPTION_TYPES,
+  type AboutOtherOption,
+} from "@/common/types/companyInformation";
 import { IconStringField } from "./IconStringField";
 import { SectionCardHeader } from "./SectionCardHeader";
 
 type HighlightListEditorProps = {
-  values: HighlightItem[];
-  onChange: (nextValues: HighlightItem[]) => void;
+  values: AboutOtherOption[];
+  onChange: (nextValues: AboutOtherOption[]) => void;
 };
 
 const newId = () => `hl-${Math.random().toString(36).slice(2, 10)}`;
 
 export const HighlightListEditor = ({ values, onChange }: HighlightListEditorProps) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [form] = Form.useForm<{ id: string; label: string; icon: string }>();
+  const [form] = Form.useForm<{ id: string; value: string; icon: string }>();
 
   const openModal = () => {
     form.resetFields();
@@ -28,14 +31,15 @@ export const HighlightListEditor = ({ values, onChange }: HighlightListEditorPro
       ...values,
       {
         id: fields.id.trim(),
-        label: fields.label.trim(),
+        type: ABOUT_OPTION_TYPES.highlight,
+        value: fields.value.trim(),
         icon: fields.icon?.trim() ?? "",
       },
     ]);
     setModalOpen(false);
   };
 
-  const updateItem = (index: number, nextItem: HighlightItem) => {
+  const updateItem = (index: number, nextItem: AboutOtherOption) => {
     const nextValues = [...values];
     nextValues[index] = nextItem;
     onChange(nextValues);
@@ -48,7 +52,7 @@ export const HighlightListEditor = ({ values, onChange }: HighlightListEditorPro
   return (
     <section className="company-information-page__section-card">
       <SectionCardHeader
-        title="Điểm nổi bật"
+        title="Điểm nổi bật (otherOptions — options)"
         onAddClick={openModal}
         addTooltip="Thêm điểm nổi bật"
       />
@@ -77,10 +81,10 @@ export const HighlightListEditor = ({ values, onChange }: HighlightListEditorPro
                   }
                 />
                 <Input
-                  value={item.label}
-                  placeholder="Nhãn hiển thị"
+                  value={item.value}
+                  placeholder="Nhãn hiển thị (value)"
                   onChange={(event) =>
-                    updateItem(index, { ...item, label: event.target.value })
+                    updateItem(index, { ...item, value: event.target.value })
                   }
                 />
               </div>
@@ -113,11 +117,11 @@ export const HighlightListEditor = ({ values, onChange }: HighlightListEditorPro
             <Input placeholder="vd: hl-experience" />
           </Form.Item>
           <Form.Item
-            name="label"
-            label="Nhãn hiển thị"
+            name="value"
+            label="Nhãn hiển thị (value)"
             rules={[{ required: true, message: "Vui lòng nhập nhãn" }]}
           >
-            <Input placeholder="Nhãn hiển thị" />
+            <Input placeholder="10+ năm kinh nghiệm" />
           </Form.Item>
           <Form.Item name="icon" label="Icon (URL hoặc emoji)">
             <Input placeholder="https://... hoặc 🚚" />

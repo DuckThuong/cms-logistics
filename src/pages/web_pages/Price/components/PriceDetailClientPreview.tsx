@@ -1,7 +1,7 @@
 import { CalendarOutlined, HomeOutlined } from "@ant-design/icons";
 import { Alert, Breadcrumb, Card, Space, Typography } from "antd";
 import { PriceSectionPreviewBlock } from "./PriceSectionPreviewBlock";
-import type { PriceDetailContent } from "../types";
+import type { PriceDetailContent } from "@/common/types/price";
 import "./PriceDetailClientPreview.scss";
 
 type PriceDetailClientPreviewProps = {

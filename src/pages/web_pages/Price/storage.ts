@@ -1,12 +1,17 @@
-import { PRICE_DETAIL_DEFAULTS, PRICE_HUB_DEFAULTS } from "./constants";
-import { mapPriceDetailToApi } from "./mapToPriceApi";
-import { migratePriceDetail, migratePriceHub } from "./migrateContent";
-import type { PriceDetailStorageRecord } from "./apiTypes";
-import type { PriceDetailContent, PriceHubContent, PriceListItem } from "./types";
+import type { ServiceByIdResponseDto } from "@/api/dtos/priceResponse.dto";
+import { PRICE_DETAIL_DEFAULTS, PRICE_HUB_DEFAULTS } from "@/common/constants/price";
+import { migratePriceDetail, migratePriceHub } from "@/common/contexts/priceMigrate";
+import { mapPriceDetailToApi } from "@/common/utils/mapToPriceApi";
+import type { PriceDetailContent, PriceHubContent, PriceListItem } from "@/common/types/price";
 
 export const PRICE_HUB_STORAGE_KEY = "cms.price.hub";
 
 export const priceDetailStorageKey = (id: string) => `cms.price.detail.${id}`;
+
+export interface PriceDetailStorageRecord {
+  cms: PriceDetailContent;
+  api: ServiceByIdResponseDto;
+}
 
 export const loadPriceHub = (): PriceHubContent => {
   const raw = localStorage.getItem(PRICE_HUB_STORAGE_KEY);

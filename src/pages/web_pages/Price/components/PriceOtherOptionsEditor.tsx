@@ -2,7 +2,7 @@ import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Space } from "antd";
 import { ImageUploadField } from "../../CompanyInfomation/components/ImageUploadField";
 import { SectionCardHeader } from "../../CompanyInfomation/components/SectionCardHeader";
-import type { PriceOtherOption } from "../types";
+import type { PriceOtherOption } from "@/common/types/price";
 
 type PriceOtherOptionsEditorProps = {
   values: PriceOtherOption[];

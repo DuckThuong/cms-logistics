@@ -1,6 +1,6 @@
-import { SERVICE_DETAIL_DEFAULTS, SERVICE_HUB_DEFAULTS } from "./constants";
-import { migrateServiceDetail, migrateServiceHub } from "./migrateContent";
-import type { ServiceDetailContent, ServiceHubContent } from "./types";
+import { SERVICE_DETAIL_DEFAULTS, SERVICE_HUB_DEFAULTS } from "@/common/constants/service";
+import { migrateServiceDetail, migrateServiceHub } from "@/common/contexts/serviceMigrate";
+import type { ServiceDetailContent, ServiceHubContent } from "@/common/types/service";
 
 export const SERVICE_HUB_STORAGE_KEY = "cms.service.hub";
 

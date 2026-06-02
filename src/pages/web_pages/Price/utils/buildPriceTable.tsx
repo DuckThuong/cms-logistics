@@ -1,5 +1,5 @@
 import type { ColumnsType } from "antd/es/table";
-import type { PriceTableCell } from "../types";
+import type { PriceTableCell } from "@/common/types/price";
 
 type SpanMeta = { rowSpan?: number; colSpan?: number };
 

@@ -9,10 +9,10 @@ import { ImageUploadField } from "../CompanyInfomation/components/ImageUploadFie
 import { ServiceHubClientPreview } from "./components/ServiceHubClientPreview";
 import { ServiceItemCardModal, type ServiceItemModalMode } from "./components/ServiceItemsEditor";
 import { ServiceListPanel } from "./components/ServiceListPanel";
-import { SERVICE_HUB_DEFAULTS } from "./constants";
-import { migrateServiceHub } from "./migrateContent";
+import { SERVICE_HUB_DEFAULTS } from "@/common/constants/service";
+import { migrateServiceHub } from "@/common/contexts/serviceMigrate";
 import { loadServiceHub, saveServiceHub } from "./storage";
-import type { ServiceHubContent, ServiceListItem } from "./types";
+import type { ServiceHubContent, ServiceListItem } from "@/common/types/service";
 import "../CompanyInfomation/style.scss";
 import "./style.scss";
 

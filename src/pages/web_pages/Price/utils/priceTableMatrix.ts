@@ -1,4 +1,4 @@
-import type { PriceTableCell } from "../types";
+import type { PriceTableCell } from "@/common/types/price";
 
 export type AnchorSlot = {
   role: "anchor";

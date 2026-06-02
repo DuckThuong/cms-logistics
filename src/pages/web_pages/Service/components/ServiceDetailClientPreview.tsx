@@ -1,6 +1,6 @@
 import { HomeOutlined } from "@ant-design/icons";
 import { Breadcrumb } from "antd";
-import type { ServiceDetailContent } from "../types";
+import type { ServiceDetailContent } from "@/common/types/service";
 import "./ServiceDetailClientPreview.scss";
 
 type ServiceDetailClientPreviewProps = {

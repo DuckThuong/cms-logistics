@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Collapse, Space, Table, Tag, Tooltip } from "antd";
 import type { ReactNode } from "react";
-import type { ServiceListItem } from "../types";
+import type { ServiceListItem } from "@/common/types/service";
 
 type ServiceListPanelProps = {
   items: ServiceListItem[];

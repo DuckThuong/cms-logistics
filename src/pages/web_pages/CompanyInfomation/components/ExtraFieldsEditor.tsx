@@ -1,7 +1,7 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Space } from "antd";
 import { useState } from "react";
-import type { ExtraFieldItem } from "../types";
+import type { ExtraFieldItem } from "@/common/types/companyInformation";
 import { SectionCardHeader } from "./SectionCardHeader";
 
 type ExtraFieldsEditorProps = {

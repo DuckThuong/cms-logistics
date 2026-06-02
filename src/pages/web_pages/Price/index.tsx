@@ -7,10 +7,10 @@ import { ROUTER_PATH } from "@/routers/Route";
 import { SeoSection } from "../CompanyInfomation/components/SeoSection";
 import { PriceItemCardModal, type PriceItemModalMode } from "./components/PriceItemCardModal";
 import { PriceListPanel } from "./components/PriceListPanel";
-import { PRICE_HUB_DEFAULTS } from "./constants";
-import { migratePriceHub } from "./migrateContent";
+import { PRICE_HUB_DEFAULTS } from "@/common/constants/price";
+import { migratePriceHub } from "@/common/contexts/priceMigrate";
 import { loadPriceHub, savePriceHub } from "./storage";
-import type { PriceHubContent, PriceListItem } from "./types";
+import type { PriceHubContent, PriceListItem } from "@/common/types/price";
 import "../CompanyInfomation/style.scss";
 import "./style.scss";
 

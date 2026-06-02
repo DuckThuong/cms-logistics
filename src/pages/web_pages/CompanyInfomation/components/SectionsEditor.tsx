@@ -2,23 +2,31 @@ import { anchorFromTitle } from "@/common/utils/anchor";
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Space } from "antd";
 import { useState } from "react";
-import type { ContentSectionItem } from "../types";
+import type { AboutSection } from "@/common/types/companyInformation";
+import { linesToDescription } from "@/common/utils/companyInformationSection";
 import { ImageUploadField } from "./ImageUploadField";
 import { SectionCardHeader } from "./SectionCardHeader";
 
 type SectionsEditorProps = {
   title: string;
-  values: ContentSectionItem[];
-  onChange: (nextValues: ContentSectionItem[]) => void;
+  values: AboutSection[];
+  onChange: (nextValues: AboutSection[]) => void;
 };
 
 const newId = () => `sec-${Math.random().toString(36).slice(2, 10)}`;
 
 export const SectionsEditor = ({ title, values, onChange }: SectionsEditorProps) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [form] = Form.useForm<ContentSectionItem>();
+  const [form] = Form.useForm<{
+    id: string;
+    anchor: string;
+    title: string;
+    description: string;
+    body: string;
+    imageUrl: string;
+  }>();
 
-  const updateItem = (index: number, nextItem: ContentSectionItem) => {
+  const updateItem = (index: number, nextItem: AboutSection) => {
     const nextValues = [...values];
     nextValues[index] = nextItem;
     onChange(nextValues);
@@ -35,7 +43,7 @@ export const SectionsEditor = ({ title, values, onChange }: SectionsEditorProps)
       anchor: "",
       title: "",
       description: "",
-      content: "",
+      body: "",
       imageUrl: "",
     });
     setModalOpen(true);
@@ -43,15 +51,21 @@ export const SectionsEditor = ({ title, values, onChange }: SectionsEditorProps)
 
   const handleSubmit = async () => {
     const fields = await form.validateFields();
+    const maxSort = values.reduce((max, section) => Math.max(max, section.sortIndex), 1);
     onChange([
       ...values,
       {
         id: fields.id.trim(),
+        sortIndex: maxSort + 1,
+        kind: "content",
+        active: true,
         anchor: fields.anchor.trim(),
         title: fields.title.trim(),
-        description: fields.description?.trim() ?? "",
-        content: fields.content?.trim() ?? "",
-        imageUrl: fields.imageUrl?.trim() ?? "",
+        description: fields.description?.trim()
+          ? linesToDescription([fields.description.trim()])
+          : [],
+        body: fields.body?.trim() ?? "",
+        images: fields.imageUrl?.trim() ? [fields.imageUrl.trim()] : [],
       },
     ]);
     setModalOpen(false);
@@ -94,7 +108,7 @@ export const SectionsEditor = ({ title, values, onChange }: SectionsEditorProps)
                     />
                   </Form.Item>
                   <Form.Item
-                    label="Liên kết nhanh"
+                    label="Liên kết nhanh (anchor)"
                     className="company-information-page__grid-field"
                   >
                     <Input
@@ -109,27 +123,37 @@ export const SectionsEditor = ({ title, values, onChange }: SectionsEditorProps)
               </div>
 
               <Input.TextArea
-                value={item.description}
+                value={item.description[0]?.text ?? ""}
                 rows={2}
-                placeholder="Mô tả ngắn"
+                placeholder="Mô tả ngắn (description[0])"
                 onChange={(event) =>
-                  updateItem(index, { ...item, description: event.target.value })
+                  updateItem(index, {
+                    ...item,
+                    description: event.target.value.trim()
+                      ? linesToDescription([event.target.value])
+                      : [],
+                  })
                 }
               />
 
               <Input.TextArea
-                value={item.content}
+                value={item.body ?? ""}
                 rows={5}
-                placeholder="Nội dung chi tiết (có thể nhiều dòng)"
+                placeholder="Nội dung chi tiết (body)"
                 onChange={(event) =>
-                  updateItem(index, { ...item, content: event.target.value })
+                  updateItem(index, { ...item, body: event.target.value })
                 }
               />
 
               <ImageUploadField
-                label="Ảnh minh hoạ (tuỳ chọn)"
-                value={item.imageUrl}
-                onChange={(nextValue) => updateItem(index, { ...item, imageUrl: nextValue })}
+                label="Ảnh minh hoạ (images[0])"
+                value={item.images[0] ?? ""}
+                onChange={(nextValue) =>
+                  updateItem(index, {
+                    ...item,
+                    images: nextValue.trim() ? [nextValue] : [],
+                  })
+                }
               />
             </div>
           ))}
@@ -180,7 +204,7 @@ export const SectionsEditor = ({ title, values, onChange }: SectionsEditorProps)
           <Form.Item name="description" label="Mô tả ngắn">
             <Input.TextArea rows={2} placeholder="Mô tả ngắn" />
           </Form.Item>
-          <Form.Item name="content" label="Nội dung chi tiết">
+          <Form.Item name="body" label="Nội dung chi tiết">
             <Input.TextArea rows={4} placeholder="Nội dung chi tiết" />
           </Form.Item>
           <Form.Item name="imageUrl" label="Ảnh minh hoạ (tuỳ chọn)">
