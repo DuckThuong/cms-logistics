@@ -17,8 +17,11 @@ export const SeoSection = ({ seoUrl, onSeoUrlChange }: SeoSectionProps) => {
         >
           <Input
             value={seoUrl}
-            onChange={(event) => onSeoUrlChange(event.target.value)}
-            placeholder="/about"
+            onChange={(event) => {
+              const cleaned = event.target.value.replace(/^\/+/, '');
+              onSeoUrlChange(cleaned);
+            }}
+            placeholder="about"
           />
         </Form.Item>
       </Form>
