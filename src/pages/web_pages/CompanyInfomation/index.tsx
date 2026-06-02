@@ -54,7 +54,7 @@ export const CompanyInformationPage = () => {
 
     const loadPage = async () => {
       try {
-        const response = await getPageByUrl("/about");
+        const response = await getPageByUrl("about");
         if (cancelled) return;
         const mapped = mapResponseToCompanyInformation(response);
         setContent(mapped);
