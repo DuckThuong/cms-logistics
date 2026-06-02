@@ -11,14 +11,8 @@ interface ApiResponse<T> {
 
 // ─── Pages API ───────────────────────────────────────────────
 
-/** Tạo page mới */
+/** Tạo page mới (kèm sections nếu có trong payload) */
 export const createPage = async (payload: AboutPagePayloadDto) => {
-  const res = await axiosClient.post<ApiResponse<AboutResponseDto>>("/api/v1/pages", payload);
-  return res.data.data;
-};
-
-/** Tạo page mới kèm sections (nested) */
-export const createPageWithSections = async (payload: AboutPagePayloadDto) => {
   const res = await axiosClient.post<ApiResponse<AboutResponseDto>>("/api/v1/pages", payload);
   return res.data.data;
 };

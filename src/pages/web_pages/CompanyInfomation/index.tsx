@@ -1,4 +1,4 @@
-﻿import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Space, message } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { anchorFromTitle } from "@/common/utils/anchor";
@@ -28,7 +28,7 @@ import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
 import { SectionsEditor } from "./components/SectionsEditor";
 import { SeoSection } from "./components/SeoSection";
-import { createPageWithSections } from "@/api/pagesApi";
+import { createPage } from "@/api/pagesApi";
 import type { AboutPagePayloadDto } from "@/api/dtos/about.response";
 import type { CompanyInformationContent } from "@/common/types/companyInformation";
 import "./style.scss";
@@ -173,7 +173,7 @@ export const CompanyInformationPage = () => {
       };
 
       // Gọi API tạo page + sections
-      const result = await createPageWithSections(payload);
+      const result = await createPage(payload);
 
       // Lưu localStorage như backup
       localStorage.setItem("cms.company-information.about", JSON.stringify(normalized));
