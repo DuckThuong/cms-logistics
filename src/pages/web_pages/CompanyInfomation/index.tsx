@@ -28,8 +28,9 @@ import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
 import { SectionsEditor } from "./components/SectionsEditor";
 import { SeoSection } from "./components/SeoSection";
-import { createPage } from "@/api/pagesApi";
-import type { AboutPagePayloadDto } from "@/api/dtos/about.response";
+import { createPage, updatePage, getPageByUrl } from "@/api/pagesApi";
+import { mapCompanyInformationToAboutApi } from "@/common/utils/mapToAboutApi";
+import { mapResponseToCompanyInformation } from "@/common/utils/mapFromApiResponse";
 import type { CompanyInformationContent } from "@/common/types/companyInformation";
 import "./style.scss";
 
@@ -41,21 +42,43 @@ export const CompanyInformationPage = () => {
   const [content, setContent] = useState<CompanyInformationContent>(
     COMPANY_INFORMATION_DEFAULTS,
   );
+  const [pageId, setPageId] = useState<number | null>(null);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("cms");
   const [messageApi, contextHolder] = message.useMessage();
 
+  // Load page data từ API (ưu tiên) hoặc localStorage (fallback)
   useEffect(() => {
-    const savedData = localStorage.getItem("cms.company-information.about");
-    if (!savedData) {
-      return;
-    }
-    try {
-      const parsedData = JSON.parse(savedData) as CompanyInformationContent;
-      setContent(migrateCompanyInformationContent(parsedData as any));
-    } catch {
-      messageApi.warning("Không thể đọc dữ liệu đã lưu trước đó.");
-    }
+    let cancelled = false;
+
+    const loadPage = async () => {
+      try {
+        const response = await getPageByUrl("/about");
+        if (cancelled) return;
+        const mapped = mapResponseToCompanyInformation(response);
+        setContent(mapped);
+        setPageId(response.id);
+        localStorage.setItem("cms.company-information.about", JSON.stringify(mapped));
+      } catch {
+        // API chưa có page → fallback localStorage
+        if (cancelled) return;
+        const savedData = localStorage.getItem("cms.company-information.about");
+        if (savedData) {
+          try {
+            const parsedData = JSON.parse(savedData) as CompanyInformationContent;
+            setContent(migrateCompanyInformationContent(parsedData as any));
+          } catch {
+            messageApi.warning("Không thể đọc dữ liệu đã lưu trước đó.");
+          }
+        }
+      } finally {
+        if (!cancelled) setIsLoadingPage(false);
+      }
+    };
+
+    loadPage();
+    return () => { cancelled = true; };
   }, [messageApi]);
 
   const normalizedSeoUrl = useMemo(
@@ -146,39 +169,23 @@ export const CompanyInformationPage = () => {
     setIsSaving(true);
     try {
       const normalized = normalizeCompanyInformationContent(content);
+      const payload = mapCompanyInformationToAboutApi(normalized);
 
-      // Map CompanyInformationContent → AboutPagePayloadDto
-      const payload: AboutPagePayloadDto = {
-        name: normalized.pageTitle || "Company Information",
-        url: normalized.seoUrl || "/about",
-        shortDescription: normalized.pageSubtitle || "",
-        content: normalized.intro?.content || "",
-        otherOptions: (normalized.otherOptions || []).map((opt) => ({
-          icon: opt.icon || "",
-          type: opt.type || "options",
-          value: opt.value || "",
-        })),
-        sections: (normalized.sections || [])
-          .filter((s) => s.active)
-          .map((s, idx) => ({
-            title: s.title || "",
-            description: (s.description || []).map((d) => ({
-              icon: d.icon || "",
-              text: d.text || "",
-            })),
-            images: s.images || [],
-            sortIndex: s.sortIndex ?? idx + 1,
-            active: s.active ?? true,
-          })),
-      };
-
-      // Gọi API tạo page + sections
-      const result = await createPage(payload);
+      let result;
+      if (pageId) {
+        // Đã có page → update
+        result = await updatePage(pageId, payload);
+        messageApi.success(`Đã cập nhật thành công! Page ID: ${result.id}`);
+      } else {
+        // Chưa có page → tạo mới
+        result = await createPage(payload);
+        setPageId(result.id);
+        messageApi.success(`Đã tạo mới thành công! Page ID: ${result.id}`);
+      }
 
       // Lưu localStorage như backup
       localStorage.setItem("cms.company-information.about", JSON.stringify(normalized));
       setContent(normalized);
-      messageApi.success(`Đã lưu thành công! Page ID: ${result.id}`);
     } catch (error: any) {
       console.error("Save failed:", error);
       messageApi.error(error?.response?.data?.message || "Lưu thất bại. Vui lòng thử lại.");

@@ -16,6 +16,9 @@ export const mapCompanyInformationToAboutApi = (
     images: content.intro.imageUrl?.trim() ? [content.intro.imageUrl.trim()] : [],
     sortIndex: INTRO_API_SORT_INDEX,
     active: true,
+    kind: null as string | null,
+    anchor: content.intro.anchor || null,
+    body: null as string | null,
   };
 
   const bodySections = content.sections.map((section) => ({
@@ -24,6 +27,9 @@ export const mapCompanyInformationToAboutApi = (
     images: section.images ?? [],
     sortIndex: section.sortIndex,
     active: section.active,
+    kind: section.kind ?? null,
+    anchor: section.anchor ?? null,
+    body: section.body ?? null,
   }));
 
   return {
