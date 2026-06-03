@@ -1,19 +1,19 @@
 // ─── Logistics palette (aligned with Header.scss) ─────────────────────────────
-$lo:          #ff6a00;
-$lo-light:    #ff8533;
-$lo-border:   rgba(255, 106, 0, 0.28);
-$lo-bg:       rgba(255, 106, 0, 0.10);
+$lo: #ff6a00;
+$lo-light: #ff8533;
+$lo-border: rgba(255, 106, 0, 0.28);
+$lo-bg: rgba(255, 106, 0, 0.1);
 
 // ─── Light content surface (app-layout__main) ───────────────────────────────────
-$page-text-title:    #0f172a;
-$page-text-body:     #475569;
-$page-text-muted:    #64748b;
-$card-bg:            #ffffff;
-$card-border:        #e8eaf0;
-$card-shadow:        0 1px 3px rgba(15, 23, 42, 0.06);
-$group-bg:           #f8fafc;
-$group-border:       #e2e8f0;
-$input-border:       #e2e8f0;
+$page-text-title: #0f172a;
+$page-text-body: #475569;
+$page-text-muted: #64748b;
+$card-bg: #ffffff;
+$card-border: #e8eaf0;
+$card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+$group-bg: #f8fafc;
+$group-border: #e2e8f0;
+$input-border: #e2e8f0;
 $input-hover-border: rgba(15, 23, 42, 0.15);
 
 $radius-sm: 8px;
@@ -66,7 +66,12 @@ $transition-base: all 0.25s ease;
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, $lo 0%, $lo-light 40%, transparent 100%);
+      background: linear-gradient(
+        90deg,
+        $lo 0%,
+        $lo-light 40%,
+        transparent 100%
+      );
       border-radius: 1px;
     }
   }
@@ -463,6 +468,12 @@ $transition-base: all 0.25s ease;
   .ant-input-affix-wrapper-focused {
     border-color: $lo-border;
     box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.08);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 12px;
   }
 }
 
