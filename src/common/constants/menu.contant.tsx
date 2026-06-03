@@ -4,6 +4,7 @@ import {
   DashboardOutlined,
   FileTextOutlined,
   HomeOutlined,
+  ReadOutlined,
   TagOutlined,
 } from "@ant-design/icons";
 import type React from "react";
@@ -35,6 +36,7 @@ export const MENU_PATHS: Record<string, string> = {
   companyInformation: ROUTER_PATH.COMPANY_INFORMATION,
   service: ROUTER_PATH.SERVICE,
   price: ROUTER_PATH.PRICE,
+  news: ROUTER_PATH.NEWS,
 };
 
 const ADMIN_MENU_GROUPS: AppMenuGroup[] = [
@@ -70,6 +72,12 @@ const ADMIN_MENU_GROUPS: AppMenuGroup[] = [
         label: "Bảng giá",
         badge: null,
       },
+      {
+        key: "news",
+        icon: <ReadOutlined />,
+        label: "Tin tức",
+        badge: null,
+      },
     ],
   },
 ];
@@ -79,6 +87,7 @@ export const ADMIN_ALLOWED_MENU_KEYS = new Set([
   "companyInformation",
   "service",
   "price",
+  "news",
   "providers",
   "customers",
 ]);
@@ -100,6 +109,13 @@ export const getActiveKeyFromPath = (pathname: string): string => {
     pathname.startsWith(`${ROUTER_PATH.PRICE}/`)
   ) {
     return "price";
+  }
+
+  if (
+    pathname === ROUTER_PATH.NEWS ||
+    pathname.startsWith(`${ROUTER_PATH.NEWS}/`)
+  ) {
+    return "news";
   }
 
   const match = Object.entries(MENU_PATHS).find(
@@ -133,6 +149,12 @@ export const getBreadcrumbs = (
       pathname !== ROUTER_PATH.PRICE
         ? [{ label: "Web pages" }, { label: "Bảng giá" }, { label: "Chi tiết" }]
         : [{ label: "Web pages" }, { label: "Danh sách bảng giá" }],
+    news:
+      pathname &&
+      pathname.startsWith(`${ROUTER_PATH.NEWS}/`) &&
+      pathname !== ROUTER_PATH.NEWS
+        ? [{ label: "Web pages" }, { label: "Tin tức" }, { label: "Chi tiết" }]
+        : [{ label: "Web pages" }, { label: "Danh sách tin tức" }],
   };
 
   return routeMap[activeKey] ?? routeMap.dashboard;

@@ -49,6 +49,10 @@ export const MainLayout = () => {
       navigate(ROUTER_PATH.PRICE);
       return;
     }
+    if (key === "news") {
+      navigate(ROUTER_PATH.NEWS);
+      return;
+    }
     navigate(path);
   };
 

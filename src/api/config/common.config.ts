@@ -9,6 +9,8 @@ import type {
   ServicePageWritePayloadDto,
   ServiceResponseDto,
 } from "../dtos/service.response";
+import type { NewsPageWritePayloadDto } from "@/api/dtos/news.response";
+import type { NewsChildDto, NewsContentDto } from "@/api/dtos/news.response";
 import type { PricePageWritePayloadDto } from "@/common/utils/mapToPriceApi";
 import {
   COMMON_ENDPOINT,
@@ -18,7 +20,8 @@ import {
 export type PageWritePayloadDto =
   | AboutPagePayloadDto
   | ServicePageWritePayloadDto
-  | PricePageWritePayloadDto;
+  | PricePageWritePayloadDto
+  | NewsPageWritePayloadDto;
 
 /** Wrapper cho ApiResponse<T> của Spring Boot */
 interface ApiResponse<T> {
@@ -80,6 +83,26 @@ export const getPriceContent = async (): Promise<ServiceResponseDto> => {
 export const getPriceById = async (id: number): Promise<PriceChildDto> => {
   const endpoint = CONTENT_ENDPOINTS.GET_PRICE_BY_ID.replace("{id}", String(id));
   const res = await axiosClient.get<ApiResponse<PriceChildDto>>(endpoint);
+  return res.data.data;
+};
+
+/** Lấy nội dung hub tin tức — cùng contract với fe-logistics. */
+export const getNewsContent = async (): Promise<NewsContentDto> => {
+  const res = await axiosClient.get<ApiResponse<NewsContentDto>>(
+    COMMON_ENDPOINT,
+    {
+      params: {
+        url: CONTENT_ENDPOINTS.GET_NEWS_CONTENT,
+      },
+    },
+  );
+  return res.data.data;
+};
+
+/** Lấy bài tin theo id (chi tiết). */
+export const getNewsById = async (id: number): Promise<NewsChildDto> => {
+  const endpoint = CONTENT_ENDPOINTS.GET_NEWS_BY_ID.replace("{id}", String(id));
+  const res = await axiosClient.get<ApiResponse<NewsChildDto>>(endpoint);
   return res.data.data;
 };
 

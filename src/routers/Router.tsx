@@ -8,6 +8,9 @@ import ServiceLayout from "@/pages/web_pages/Service/ServiceLayout";
 import PriceListPage from "@/pages/web_pages/Price";
 import PriceDetailEditorPage from "@/pages/web_pages/Price/PriceDetailPage";
 import PriceLayout from "@/pages/web_pages/Price/PriceLayout";
+import NewsListPage from "@/pages/web_pages/New";
+import NewsDetailEditorPage from "@/pages/web_pages/New/NewsDetailPage";
+import NewLayout from "@/pages/web_pages/New/NewLayout";
 import DashboardPage from "../pages/web_pages/DashBoard/Dashboard";
 import { Route, Routes } from "react-router-dom";
 import { ROUTER_NAME, ROUTER_PATH } from "./Route";
@@ -34,6 +37,13 @@ export const WebRouter = () => (
         <Route
           path={ROUTER_NAME.PRICE_DETAIL_ID}
           element={<PriceDetailEditorPage />}
+        />
+      </Route>
+      <Route path={ROUTER_NAME.NEWS} element={<NewLayout />}>
+        <Route index element={<NewsListPage />} />
+        <Route
+          path={ROUTER_NAME.NEWS_DETAIL_ID}
+          element={<NewsDetailEditorPage />}
         />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
