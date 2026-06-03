@@ -1,13 +1,19 @@
 import { anchorFromTitle } from "@/common/utils/anchor";
 import type { AboutSection } from "@/common/types/companyInformation";
 import {
+  ABOUT_CONTENT_DESCRIPTION_TYPES,
   DEFAULT_DESCRIPTION_TYPE,
-  descriptionToLines,
   emptyDescriptionItem,
   linesToDescription,
+  type AboutContentDescriptionType,
 } from "@/common/utils/companyInformationSection";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Select } from "antd";
+
+const DESCRIPTION_TYPE_OPTIONS = [
+  { value: "text", label: "Text" },
+  { value: "text-bullet", label: "Text bullet" },
+] as const;
 
 type PolicySectionsEditorProps = {
   title?: string;
@@ -48,11 +54,26 @@ export const PolicySectionsEditor = ({
     onChange([...values, createEmptySection(maxSort + 1)]);
   };
 
+  const getDescriptionItems = (section: AboutSection) =>
+    section.description.length > 0 ? section.description : [emptyDescriptionItem()];
+
   const updateContentRow = (sectionIndex: number, rowIndex: number, text: string) => {
     const section = values[sectionIndex];
-    const items = [...section.description];
+    const items = [...getDescriptionItems(section)];
     const current = items[rowIndex] ?? emptyDescriptionItem();
-    items[rowIndex] = { ...current, text, type: current.type || DEFAULT_DESCRIPTION_TYPE };
+    items[rowIndex] = { ...current, text };
+    updateSection(sectionIndex, { ...section, description: items });
+  };
+
+  const updateContentRowType = (
+    sectionIndex: number,
+    rowIndex: number,
+    type: AboutContentDescriptionType,
+  ) => {
+    const section = values[sectionIndex];
+    const items = [...getDescriptionItems(section)];
+    const current = items[rowIndex] ?? emptyDescriptionItem();
+    items[rowIndex] = { ...current, type };
     updateSection(sectionIndex, { ...section, description: items });
   };
 
@@ -60,20 +81,20 @@ export const PolicySectionsEditor = ({
     const section = values[sectionIndex];
     updateSection(sectionIndex, {
       ...section,
-      description: [...section.description, emptyDescriptionItem()],
+      description: [...getDescriptionItems(section), emptyDescriptionItem()],
     });
   };
 
   const removeContentRow = (sectionIndex: number, rowIndex: number) => {
     const section = values[sectionIndex];
-    const lines = descriptionToLines(section.description);
-    if (lines.length <= 1) {
+    const items = getDescriptionItems(section);
+    if (items.length <= 1) {
       updateSection(sectionIndex, { ...section, description: linesToDescription([""]) });
       return;
     }
     updateSection(sectionIndex, {
       ...section,
-      description: section.description.filter((_, idx) => idx !== rowIndex),
+      description: items.filter((_, idx) => idx !== rowIndex),
     });
   };
 
@@ -121,15 +142,35 @@ export const PolicySectionsEditor = ({
                 </Form.Item>
 
                 <div className="company-information-page__group-row">
-                  <span className="company-information-page__group-label">Nội dung</span>
+                  <span className="company-information-page__group-label">
+                    Nội dung (mỗi dòng hiển thị trên FE)
+                  </span>
                   <div className="company-information-page__content-rows">
-                    {descriptionToLines(section.description).map((line, rowIndex) => (
+                    {getDescriptionItems(section).map((item, rowIndex) => (
                       <div
                         className="company-information-page__content-row"
                         key={`${section.id}-row-${rowIndex}`}
                       >
+                        <Select
+                          className="company-information-page__content-type-select"
+                          value={
+                            ABOUT_CONTENT_DESCRIPTION_TYPES.includes(
+                              item.type as AboutContentDescriptionType,
+                            )
+                              ? (item.type as AboutContentDescriptionType)
+                              : DEFAULT_DESCRIPTION_TYPE
+                          }
+                          options={[...DESCRIPTION_TYPE_OPTIONS]}
+                          onChange={(type) =>
+                            updateContentRowType(
+                              sectionIndex,
+                              rowIndex,
+                              type as AboutContentDescriptionType,
+                            )
+                          }
+                        />
                         <Input
-                          value={line}
+                          value={item.text}
                           placeholder={`Nội dung ${rowIndex + 1}`}
                           onChange={(e) =>
                             updateContentRow(sectionIndex, rowIndex, e.target.value)
@@ -151,7 +192,7 @@ export const PolicySectionsEditor = ({
                       icon={<PlusOutlined />}
                       onClick={() => addContentRow(sectionIndex)}
                     >
-                      Thêm nội dung
+                      Thêm dòng
                     </Button>
                   </div>
                 </div>
