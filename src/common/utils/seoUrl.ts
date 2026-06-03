@@ -1,11 +1,11 @@
 export type SeoUrlOptions = {
   /**
    * Nếu truyền title, sẽ tạo slug từ title.
-   * Nếu truyền url, sẽ chuẩn hóa url (bắt đầu bằng '/', bỏ khoảng trắng, bỏ trùng dấu '/').
+   * Nếu truyền url, sẽ chuẩn hóa url (trim, gom dấu '/' trùng, bỏ '/' cuối).
    */
   mode?: "from-title" | "normalize-url";
   /**
-   * Prefix path, ví dụ: "/about" hoặc "/pages".
+   * Prefix path, ví dụ: "about" hoặc "pages".
    * Khi mode="from-title", kết quả sẽ là `${prefix}/${slug}` (đã normalize).
    */
   prefix?: string;
@@ -15,21 +15,14 @@ export type SeoUrlOptions = {
 
 const collapseSlashes = (value: string) => value.replace(/\/{2,}/g, "/");
 
-const ensureLeadingSlash = (value: string) => {
-  const trimmed = value.trim();
-  if (!trimmed) return "/";
-  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-};
-
-const trimTrailingSlashExceptRoot = (value: string) => {
-  if (value === "/") return value;
-  return value.replace(/\/+$/g, "");
-};
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/g, "");
 
 export const normalizeSeoUrl = (url: string) => {
-  const withSlash = ensureLeadingSlash(url);
-  const collapsed = collapseSlashes(withSlash);
-  return trimTrailingSlashExceptRoot(collapsed);
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+  const collapsed = collapseSlashes(trimmed);
+  const withoutTrailing = trimTrailingSlash(collapsed);
+  return withoutTrailing.replace(/^\/+/, "");
 };
 
 export const slugify = (input: string, maxLength = 80) => {
@@ -64,7 +57,7 @@ export const buildSeoUrl = (input: string, options: SeoUrlOptions = {}) => {
 
   if (mode === "from-title") {
     const slug = slugify(input, options.maxSlugLength ?? 80);
-    const combined = prefix ? `${prefix}/${slug}` : `/${slug}`;
+    const combined = prefix ? `${prefix}/${slug}` : slug;
     return normalizeSeoUrl(combined);
   }
 
@@ -73,8 +66,10 @@ export const buildSeoUrl = (input: string, options: SeoUrlOptions = {}) => {
   if (!prefix) return base;
 
   // Nếu user nhập "/about/abc" mà prefix="/about" thì giữ nguyên; nếu nhập "abc" thì ghép prefix.
-  const baseNoSlash = base.startsWith("/") ? base.slice(1) : base;
-  const prefixNoSlash = prefix.startsWith("/") ? prefix.slice(1) : prefix;
+  const stripLeadingSlash = (value: string) =>
+    value.startsWith("/") ? value.slice(1) : value;
+  const baseNoSlash = stripLeadingSlash(base);
+  const prefixNoSlash = stripLeadingSlash(prefix);
   if (baseNoSlash === prefixNoSlash || base.startsWith(prefix + "/")) return base;
 
   const combined = `${prefix}/${baseNoSlash}`;

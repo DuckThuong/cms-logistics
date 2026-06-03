@@ -70,7 +70,7 @@ const orderSections: PriceDetailContent["sections"] = [
 ];
 
 export const PRICE_HUB_DEFAULTS: PriceHubContent = {
-  seoUrl: "/bang-gia",
+  seoUrl: "bang-gia",
   name: "Bảng giá",
   shortDescription: "Bảng giá",
   content: "Tra cứu bảng giá dịch vụ order, ký gửi và vận chuyển chính ngạch Trung Quốc — Việt Nam.",

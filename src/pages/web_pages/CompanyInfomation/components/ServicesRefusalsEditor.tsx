@@ -104,29 +104,37 @@ export const ServicesRefusalsEditor = ({
                   icon={<DeleteOutlined />}
                   onClick={() => removeSection(sectionIndex)}
                   aria-label="Xóa section"
+                  disabled={section.kind === "closing"}
                 />
               </div>
 
               <Form layout="vertical">
-                <div className="company-information-page__inline-grid">
-                  <Form.Item label="Tiêu đề">
-                    <Input
-                      value={section.title}
-                      placeholder="VD: Terms of Service"
-                      onChange={(e) => {
-                        const title = e.target.value;
-                        updateSection(sectionIndex, {
-                          ...section,
-                          title,
-                          anchor: anchorFromTitle(title),
-                        });
-                      }}
-                    />
-                  </Form.Item>
-                  <Form.Item label="Anchor (tự động)">
-                    <Input value={section.anchor} disabled />
-                  </Form.Item>
-                </div>
+                {section.kind === "closing" ? (
+                  <p className="company-information-page__section-hint">
+                    Đoạn kết — section cuối trong <code>sections</code> (FE lấy theo sortIndex
+                    lớn nhất). Để trống tiêu đề, chỉnh 2 dòng nội dung bên dưới.
+                  </p>
+                ) : (
+                  <div className="company-information-page__inline-grid">
+                    <Form.Item label="Tiêu đề">
+                      <Input
+                        value={section.title}
+                        placeholder="VD: Terms of Service"
+                        onChange={(e) => {
+                          const title = e.target.value;
+                          updateSection(sectionIndex, {
+                            ...section,
+                            title,
+                            anchor: anchorFromTitle(title),
+                          });
+                        }}
+                      />
+                    </Form.Item>
+                    <Form.Item label="Anchor (tự động)">
+                      <Input value={section.anchor} disabled />
+                    </Form.Item>
+                  </div>
+                )}
 
                 <div className="company-information-page__group-row">
                   <span className="company-information-page__group-label">
@@ -162,7 +170,7 @@ export const ServicesRefusalsEditor = ({
 
           <div className="company-information-page__footer-actions">
             <Button type="primary" icon={<PlusOutlined />} onClick={addSection}>
-              Thêm section policy
+              Thêm section
             </Button>
           </div>
         </>

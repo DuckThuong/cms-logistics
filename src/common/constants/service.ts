@@ -74,7 +74,7 @@ const shippingSections = [
 ];
 
 export const SERVICE_HUB_DEFAULTS: ServiceHubContent = {
-  seoUrl: "/dich-vu",
+  seoUrl: "dich-vu",
   name: "Dịch vụ",
   shortDescription: "Dịch vụ",
   content:

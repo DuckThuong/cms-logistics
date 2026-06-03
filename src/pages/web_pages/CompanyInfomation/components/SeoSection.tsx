@@ -18,7 +18,7 @@ export const SeoSection = ({ seoUrl, onSeoUrlChange }: SeoSectionProps) => {
           <Input
             value={seoUrl}
             onChange={(event) => onSeoUrlChange(event.target.value)}
-            placeholder="/about"
+            placeholder="about"
           />
         </Form.Item>
       </Form>

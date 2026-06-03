@@ -45,7 +45,7 @@ const ensureListItem = (item: ServiceListItem, index: number): ServiceListItem =
 };
 
 export const migrateServiceHub = (data: ServiceHubContent): ServiceHubContent => ({
-  seoUrl: data.seoUrl?.trim() || "/dich-vu",
+  seoUrl: data.seoUrl?.trim() || "dich-vu",
   name: data.name ?? "",
   shortDescription: data.shortDescription ?? "",
   content: data.content ?? "",

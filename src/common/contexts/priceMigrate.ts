@@ -83,7 +83,7 @@ const ensureOtherOption = (opt: PriceOtherOption): PriceOtherOption => ({
 });
 
 export const migratePriceHub = (data: PriceHubContent): PriceHubContent => ({
-  seoUrl: data.seoUrl?.trim() || "/bang-gia",
+  seoUrl: data.seoUrl?.trim() || "bang-gia",
   name: data.name ?? "",
   shortDescription: data.shortDescription ?? "",
   content: data.content ?? "",

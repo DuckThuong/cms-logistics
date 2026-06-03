@@ -103,7 +103,7 @@ export const mapResponseToCompanyInformation = (
   }));
 
   return {
-    seoUrl: response.url ?? "/about",
+    seoUrl: response.url ?? "about",
     pageTag: response.shortDescription ?? "",
     pageTitle: response.name ?? "",
     pageSubtitle: response.content ?? "",

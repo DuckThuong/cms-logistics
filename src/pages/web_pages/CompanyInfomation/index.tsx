@@ -26,10 +26,8 @@ import {
 } from "@/common/utils/companyInformationOtherOptions";
 import {
   filterSectionsByKind,
-  getClosingLines,
   reindexSections,
   replaceSectionsByKind,
-  upsertClosingSection,
 } from "@/common/utils/companyInformationSection";
 import { mapResponseToCompanyInformation } from "@/common/utils/mapFromApiResponse";
 import { mapCompanyInformationToAboutApi } from "@/common/utils/mapToAboutApi";
@@ -153,12 +151,11 @@ export const CompanyInformationPage = () => {
   );
 
   const contentSections = useMemo(
-    () => filterSectionsByKind(content.sections, "content"),
-    [content.sections],
-  );
-
-  const [closingLineOne, closingLineTwo] = useMemo(
-    () => getClosingLines(content.sections),
+    () =>
+      [
+        ...filterSectionsByKind(content.sections, "content"),
+        ...filterSectionsByKind(content.sections, "closing"),
+      ].sort((a, b) => a.sortIndex - b.sortIndex),
     [content.sections],
   );
 
@@ -194,15 +191,14 @@ export const CompanyInformationPage = () => {
     );
   };
 
-  const updateContentSections = (nextContent: typeof contentSections) => {
+  const updateContentSections = (nextSections: typeof contentSections) => {
+    const nextContent = nextSections.filter((section) => section.kind === "content");
+    const nextClosing = nextSections.filter((section) => section.kind === "closing");
+    const policy = filterSectionsByKind(content.sections, "policy");
     updateField(
       "sections",
-      reindexSections(replaceSectionsByKind(content.sections, "content", nextContent)),
+      reindexSections([...policy, ...nextContent, ...nextClosing]),
     );
-  };
-
-  const updateClosing = (lineOne: string, lineTwo: string) => {
-    updateField("sections", reindexSections(upsertClosingSection(content.sections, lineOne, lineTwo)));
   };
 
   const handleHighlightChange = (highlights: typeof highlightOptions) => {
@@ -356,12 +352,12 @@ export const CompanyInformationPage = () => {
           values={highlightOptions}
           onChange={handleHighlightChange}
         />
-        {/* 
+
         <QuickLinksAutoPanel
           title="Quick Links"
           values={quickLinkOptions}
           onIconChange={handleQuickLinkIconChange}
-        /> */}
+        />
 
         <PolicySectionsEditor
           title="Khối Chính sách (Policy)"
@@ -374,24 +370,6 @@ export const CompanyInformationPage = () => {
           values={contentSections}
           onChange={updateContentSections}
         />
-
-        <section className="company-information-page__section-card">
-          <h3>Đoạn kết (Closing)</h3>
-          <Form layout="vertical">
-            <Form.Item label="Dòng 1">
-              <Input
-                value={closingLineOne}
-                onChange={(event) => updateClosing(event.target.value, closingLineTwo)}
-              />
-            </Form.Item>
-            <Form.Item label="Dòng 2">
-              <Input
-                value={closingLineTwo}
-                onChange={(event) => updateClosing(closingLineOne, event.target.value)}
-              />
-            </Form.Item>
-          </Form>
-        </section>
 
         <div className="company-information-page__actions">
           <Button

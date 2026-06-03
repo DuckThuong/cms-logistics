@@ -76,7 +76,7 @@ const defaultClosingSection: AboutSection = {
 };
 
 export const COMPANY_INFORMATION_DEFAULTS: CompanyInformationContent = {
-  seoUrl: "/about",
+  seoUrl: "about",
   pageTag: "Về Công Ty Logistics",
   pageTitle: "Giới Thiệu",
   pageSubtitle:
