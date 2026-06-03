@@ -1,8 +1,3 @@
-import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Form, Input, Space } from "antd";
-import { isAxiosError } from "axios";
-import { useEffect, useMemo, useState } from "react";
 import {
   createPage,
   getAboutContent,
@@ -34,14 +29,19 @@ import { mapCompanyInformationToAboutApi } from "@/common/utils/mapToAboutApi";
 import { normalizeSeoUrl } from "@/common/utils/seoUrl";
 import { useLoading } from "@/providers/loadingProvider";
 import { useNotification } from "@/providers/notificationProvider";
+import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Form, Input, Space } from "antd";
+import { isAxiosError } from "axios";
+import { useEffect, useMemo, useState } from "react";
 import { CompanyInformationClientPreview } from "./components/CompanyInformationClientPreview";
 import { ExtraFieldsEditor } from "./components/ExtraFieldsEditor";
 import { HighlightListEditor } from "./components/HighlightListEditor";
 import { ImageUploadField } from "./components/ImageUploadField";
-import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
-import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
 import { PolicySectionsEditor } from "./components/PolicySectionsEditor";
+import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { SeoSection } from "./components/SeoSection";
+import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
 import { EMPTY_COMPANY_INFORMATION_CONTENT } from "./emptyCompanyInformationContent";
 import "./style.scss";
 
