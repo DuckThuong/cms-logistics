@@ -1,5 +1,5 @@
 import type { AboutOtherOption } from "@/common/types/companyInformation";
-import { IconStringField } from "./IconStringField";
+import { Input } from "antd";
 
 type QuickLinksAutoPanelProps = {
   title?: string;
@@ -8,11 +8,19 @@ type QuickLinksAutoPanelProps = {
   onIconChange: (linkId: string, icon: string) => void;
 };
 
+const isImageIconSrc = (value: string) => {
+  const trimmed = value.trim();
+  return (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:")
+  );
+};
+
 export const QuickLinksAutoPanel = ({ title, values, links: linksProp, onIconChange }: QuickLinksAutoPanelProps) => {
   const links = values ?? linksProp ?? [];
 
-  return (
-  <section className="company-information-page__section-card">
+  return (  <section className="company-information-page__section-card">
     <h3 className="company-information-page__section-card-title">
       {title ?? "Liên kết nhanh (otherOptions — quick-link)"}
     </h3>
@@ -34,13 +42,26 @@ export const QuickLinksAutoPanel = ({ title, values, links: linksProp, onIconCha
               <code className="company-information-page__quick-links-anchor">type: quick-link</code>
             </div>
             <div className="company-information-page__quick-links-icon-edit">
-              <label className="company-information-page__quick-links-icon-label">Icon</label>
-              <IconStringField
-                value={item.icon ?? ""}
-                onChange={(icon) => onIconChange(item.id, icon)}
-              />
-            </div>
-          </li>
+              <span className="company-information-page__quick-links-icon-label">Icon</span>
+              <div className="company-information-page__icon-field">
+                <Input
+                  value={item.icon ?? ""}
+                  placeholder="URL ảnh icon hoặc emoji (vd: 🚚)"
+                  onChange={(event) => onIconChange(item.id, event.target.value)}
+                />
+                {item.icon?.trim() ? (
+                  <div className="company-information-page__icon-preview" aria-hidden>
+                    {isImageIconSrc(item.icon) ? (
+                      <img src={item.icon.trim()} alt="" />
+                    ) : (
+                      <span className="company-information-page__icon-preview-text">
+                        {item.icon.trim()}
+                      </span>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            </div>          </li>
         ))}
       </ul>
     )}

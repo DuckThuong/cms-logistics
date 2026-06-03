@@ -33,7 +33,7 @@ import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons"
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Form, Input, Space } from "antd";
 import { isAxiosError } from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CompanyInformationClientPreview } from "./components/CompanyInformationClientPreview";
 import { ExtraFieldsEditor } from "./components/ExtraFieldsEditor";
 import { HighlightListEditor } from "./components/HighlightListEditor";
@@ -62,6 +62,10 @@ export const CompanyInformationPage = () => {
   );
   const [pageId, setPageId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("cms");
+  const [quickLinkIconDrafts, setQuickLinkIconDrafts] = useState<Record<string, string>>(
+    {},
+  );
+  const hydratedAboutIdRef = useRef<number | null>(null);
 
   const { data: aboutPage, isLoading } = useQuery({
     queryKey: [CONTENT_ENDPOINTS.GET_ABOUT_CONTENT],
@@ -85,8 +89,26 @@ export const CompanyInformationPage = () => {
     if (!aboutPage) {
       return;
     }
-    setContent(mapResponseToCompanyInformation(aboutPage));
+    if (hydratedAboutIdRef.current === aboutPage.id) {
+      return;
+    }
+    hydratedAboutIdRef.current = aboutPage.id;
+
+    const mapped = mapResponseToCompanyInformation(aboutPage);
+    setContent(mapped);
     setPageId(aboutPage.id);
+
+    const icons: Record<string, string> = {};
+    for (const link of getQuickLinkOptions(
+      syncOtherOptions({
+        intro: mapped.intro,
+        sections: mapped.sections,
+        otherOptions: mapped.otherOptions,
+      }),
+    )) {
+      icons[link.id] = link.icon ?? "";
+    }
+    setQuickLinkIconDrafts(icons);
   }, [aboutPage]);
 
   useEffect(() => {
@@ -108,7 +130,15 @@ export const CompanyInformationPage = () => {
     },
     onSuccess: ({ result, normalized }, variables) => {
       setPageId(result.id);
+      hydratedAboutIdRef.current = result.id;
       setContent(normalized);
+
+      const icons: Record<string, string> = {};
+      for (const link of getQuickLinkOptions(normalized.otherOptions)) {
+        icons[link.id] = link.icon ?? "";
+      }
+      setQuickLinkIconDrafts(icons);
+
       const wasUpdate = variables.pageId != null;
       showNotification(
         wasUpdate
@@ -179,6 +209,29 @@ export const CompanyInformationPage = () => {
     [syncedOtherOptions],
   );
 
+  const quickLinksForPanel = useMemo(
+    () =>
+      quickLinkOptions.map((link) => ({
+        ...link,
+        icon: quickLinkIconDrafts[link.id] ?? link.icon ?? "",
+      })),
+    [quickLinkOptions, quickLinkIconDrafts],
+  );
+
+  useEffect(() => {
+    setQuickLinkIconDrafts((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const link of quickLinkOptions) {
+        if (!(link.id in next)) {
+          next[link.id] = link.icon ?? "";
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [quickLinkOptions]);
+
   const contentForPreview = useMemo(
     () =>
       normalizeCompanyInformationContent({
@@ -221,6 +274,10 @@ export const CompanyInformationPage = () => {
   };
 
   const handleQuickLinkIconChange = (linkId: string, icon: string) => {
+    setQuickLinkIconDrafts((prev) => ({
+      ...prev,
+      [linkId]: icon,
+    }));
     setContent((prev) => ({
       ...prev,
       otherOptions: patchQuickLinkIcon(prev.otherOptions, linkId, icon),
@@ -228,7 +285,14 @@ export const CompanyInformationPage = () => {
   };
 
   const handleSave = () => {
-    saveMutation.mutate({ content, pageId });
+    let otherOptions = content.otherOptions;
+    for (const [linkId, icon] of Object.entries(quickLinkIconDrafts)) {
+      otherOptions = patchQuickLinkIcon(otherOptions, linkId, icon);
+    }
+    saveMutation.mutate({
+      content: { ...content, otherOptions },
+      pageId,
+    });
   };
 
   const isSaving = saveMutation.isPending;
@@ -370,7 +434,7 @@ export const CompanyInformationPage = () => {
 
         <QuickLinksAutoPanel
           title="Quick Links"
-          values={quickLinkOptions}
+          values={quickLinksForPanel}
           onIconChange={handleQuickLinkIconChange}
         />
 
