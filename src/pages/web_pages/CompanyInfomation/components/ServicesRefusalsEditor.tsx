@@ -140,29 +140,38 @@ export const ServicesRefusalsEditor = ({
                   <span className="company-information-page__group-label">
                     Nội dung (mỗi dòng hiển thị trên FE)
                   </span>
-                  {descriptionToLines(section.description).map((line, rowIndex) => (
-                    <div className="company-information-page__group-row-item" key={rowIndex}>
-                      <Input
-                        value={line}
-                        placeholder={`Dòng ${rowIndex + 1}`}
-                        onChange={(e) => updateContentRow(sectionIndex, rowIndex, e.target.value)}
-                      />
-                      <Button
-                        danger
-                        type="text"
-                        icon={<DeleteOutlined />}
-                        onClick={() => removeContentRow(sectionIndex, rowIndex)}
-                        aria-label="Xóa dòng"
-                      />
-                    </div>
-                  ))}
-                  <Button
-                    type="dashed"
-                    icon={<PlusOutlined />}
-                    onClick={() => addContentRow(sectionIndex)}
-                  >
-                    Thêm dòng
-                  </Button>
+                  <div className="company-information-page__content-rows">
+                    {descriptionToLines(section.description).map((line, rowIndex) => (
+                      <div
+                        className="company-information-page__content-row"
+                        key={`${section.id}-row-${rowIndex}`}
+                      >
+                        <Input
+                          value={line}
+                          placeholder={`Dòng ${rowIndex + 1}`}
+                          onChange={(e) =>
+                            updateContentRow(sectionIndex, rowIndex, e.target.value)
+                          }
+                        />
+                        <Button
+                          danger
+                          type="text"
+                          icon={<DeleteOutlined />}
+                          onClick={() => removeContentRow(sectionIndex, rowIndex)}
+                          aria-label="Xóa dòng"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="company-information-page__add-content-action">
+                    <Button
+                      type="dashed"
+                      icon={<PlusOutlined />}
+                      onClick={() => addContentRow(sectionIndex)}
+                    >
+                      Thêm dòng
+                    </Button>
+                  </div>
                 </div>
               </Form>
             </div>

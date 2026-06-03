@@ -360,13 +360,13 @@ export const CompanyInformationPage = () => {
         />
 
         <PolicySectionsEditor
-          title="Khối Chính sách (Policy)"
+          title="Khối Chính sách"
           values={policySections}
           onChange={updatePolicySections}
         />
 
         <ServicesRefusalsEditor
-          title="Dịch vụ & Từ chối"
+          title="Mục nội dung"
           values={contentSections}
           onChange={updateContentSections}
         />
