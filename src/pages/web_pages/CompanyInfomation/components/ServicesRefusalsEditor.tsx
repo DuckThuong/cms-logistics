@@ -1,8 +1,18 @@
 import { anchorFromTitle } from "@/common/utils/anchor";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Select } from "antd";
 import type { AboutSection } from "@/common/types/companyInformation";
-import { descriptionToLines, linesToDescription } from "@/common/utils/companyInformationSection";
+import type { AboutContentDescriptionType } from "@/common/utils/companyInformationSection";
+import {
+  ABOUT_CONTENT_DESCRIPTION_TYPES,
+  DEFAULT_DESCRIPTION_TYPE,
+  emptyDescriptionItem,
+} from "@/common/utils/companyInformationSection";
+
+const DESCRIPTION_TYPE_OPTIONS = [
+  { value: "text", label: "Text" },
+  { value: "text-bullet", label: "Text bullet" },
+] as const;
 
 type ServicesRefusalsEditorProps = {
   title?: string;
@@ -20,7 +30,7 @@ const createEmptySection = (sortIndex: number): AboutSection => ({
   active: true,
   title: "",
   anchor: "",
-  description: linesToDescription([""]),
+  description: [emptyDescriptionItem()],
   images: [],
 });
 
@@ -47,34 +57,47 @@ export const ServicesRefusalsEditor = ({
     onChange([...sections, createEmptySection(maxSort + 1)]);
   };
 
-  const updateContentRow = (sectionIndex: number, rowIndex: number, value: string) => {
+  const getDescriptionItems = (section: AboutSection) =>
+    section.description.length > 0 ? section.description : [emptyDescriptionItem()];
+
+  const updateContentRow = (sectionIndex: number, rowIndex: number, text: string) => {
     const section = sections[sectionIndex];
-    const lines = descriptionToLines(section.description);
-    lines[rowIndex] = value;
-    updateSection(sectionIndex, {
-      ...section,
-      description: linesToDescription(lines),
-    });
+    const items = [...getDescriptionItems(section)];
+    const current = items[rowIndex] ?? emptyDescriptionItem();
+    items[rowIndex] = { ...current, text };
+    updateSection(sectionIndex, { ...section, description: items });
+  };
+
+  const updateContentRowType = (
+    sectionIndex: number,
+    rowIndex: number,
+    type: AboutContentDescriptionType,
+  ) => {
+    const section = sections[sectionIndex];
+    const items = [...getDescriptionItems(section)];
+    const current = items[rowIndex] ?? emptyDescriptionItem();
+    items[rowIndex] = { ...current, type };
+    updateSection(sectionIndex, { ...section, description: items });
   };
 
   const addContentRow = (sectionIndex: number) => {
     const section = sections[sectionIndex];
     updateSection(sectionIndex, {
       ...section,
-      description: linesToDescription([...descriptionToLines(section.description), ""]),
+      description: [...getDescriptionItems(section), emptyDescriptionItem()],
     });
   };
 
   const removeContentRow = (sectionIndex: number, rowIndex: number) => {
     const section = sections[sectionIndex];
-    const lines = descriptionToLines(section.description);
-    if (lines.length <= 1) {
-      updateSection(sectionIndex, { ...section, description: linesToDescription([""]) });
+    const items = getDescriptionItems(section);
+    if (items.length <= 1) {
+      updateSection(sectionIndex, { ...section, description: [emptyDescriptionItem()] });
       return;
     }
     updateSection(sectionIndex, {
       ...section,
-      description: linesToDescription(lines.filter((_, idx) => idx !== rowIndex)),
+      description: items.filter((_, idx) => idx !== rowIndex),
     });
   };
 
@@ -141,13 +164,31 @@ export const ServicesRefusalsEditor = ({
                     Nội dung (mỗi dòng hiển thị trên FE)
                   </span>
                   <div className="company-information-page__content-rows">
-                    {descriptionToLines(section.description).map((line, rowIndex) => (
+                    {getDescriptionItems(section).map((item, rowIndex) => (
                       <div
                         className="company-information-page__content-row"
                         key={`${section.id}-row-${rowIndex}`}
                       >
+                        <Select
+                          className="company-information-page__content-type-select"
+                          value={
+                            ABOUT_CONTENT_DESCRIPTION_TYPES.includes(
+                              item.type as AboutContentDescriptionType,
+                            )
+                              ? (item.type as AboutContentDescriptionType)
+                              : DEFAULT_DESCRIPTION_TYPE
+                          }
+                          options={[...DESCRIPTION_TYPE_OPTIONS]}
+                          onChange={(type) =>
+                            updateContentRowType(
+                              sectionIndex,
+                              rowIndex,
+                              type as AboutContentDescriptionType,
+                            )
+                          }
+                        />
                         <Input
-                          value={line}
+                          value={item.text}
                           placeholder={`Dòng ${rowIndex + 1}`}
                           onChange={(e) =>
                             updateContentRow(sectionIndex, rowIndex, e.target.value)

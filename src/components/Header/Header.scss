@@ -1,21 +1,21 @@
 // ─── Logistics Header Variables ───────────────────────────────────────────────
-$lo:          #ff6a00;
-$lo-dark:     #e55d00;
-$lo-light:    #ff8533;
-$lo-soft:     #ffb380;
-$lo-bg:       rgba(255, 106, 0, 0.10);
-$lo-border:   rgba(255, 106, 0, 0.28);
-$lo-glow:     rgba(255, 106, 0, 0.18);
+$lo: #ff6a00;
+$lo-dark: #e55d00;
+$lo-light: #ff8533;
+$lo-soft: #ffb380;
+$lo-bg: rgba(255, 106, 0, 0.1);
+$lo-border: rgba(255, 106, 0, 0.28);
+$lo-glow: rgba(255, 106, 0, 0.18);
 
-$header-bg:        #0f0e1c;
-$header-border:    rgba(255, 255, 255, 0.06);
-$header-height:    64px;
+$header-bg: #0f0e1c;
+$header-border: rgba(255, 255, 255, 0.06);
+$header-height: 64px;
 
-$text-white:       #f1f5f9;
-$text-secondary:   #94a3b8;
-$text-muted:       #64748b;
-$input-bg:         rgba(255, 255, 255, 0.04);
-$hover-bg:         rgba(255, 255, 255, 0.05);
+$text-white: #f1f5f9;
+$text-secondary: #94a3b8;
+$text-muted: #64748b;
+$input-bg: rgba(255, 255, 255, 0.04);
+$hover-bg: rgba(255, 255, 255, 0.05);
 
 $radius-sm: 8px;
 $radius-md: 12px;
@@ -43,7 +43,11 @@ $transition-base: all 0.25s ease;
     left: 0;
     width: 280px;
     height: 100%;
-    background: radial-gradient(ellipse at 0% 50%, rgba(255, 106, 0, 0.07) 0%, transparent 70%);
+    background: radial-gradient(
+      ellipse at 0% 50%,
+      rgba(255, 106, 0, 0.07) 0%,
+      transparent 70%
+    );
     pointer-events: none;
   }
 
@@ -66,6 +70,10 @@ $transition-base: all 0.25s ease;
     height: 100%;
     padding: 0 20px;
     gap: 16px;
+  }
+
+  &__icon-btn {
+    background-color: #f1f5f9 !important;
   }
 }
 
@@ -252,7 +260,7 @@ $transition-base: all 0.25s ease;
 
   &:hover {
     background: $hover-bg;
-    border-color: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.1);
     color: $text-white;
 
     .hk-header__profile-chevron {

@@ -1,6 +1,9 @@
 import type { AboutIntro, AboutSection, CompanyInformationContent } from "@/common/types/companyInformation";
 import { syncOtherOptions } from "@/common/utils/companyInformationOtherOptions";
-import { reindexSections } from "@/common/utils/companyInformationSection";
+import {
+  DEFAULT_DESCRIPTION_TYPE,
+  reindexSections,
+} from "@/common/utils/companyInformationSection";
 import { toAnchorId } from "@/common/utils/anchor";
 import { normalizeSeoUrl } from "@/common/utils/seoUrl";
 
@@ -26,6 +29,7 @@ const normalizeSection = (section: AboutSection): AboutSection => {
     description: (section.description ?? []).map((item) => ({
       icon: item.icon ?? "",
       text: item.text ?? "",
+      type: item.type?.trim() || DEFAULT_DESCRIPTION_TYPE,
     })),
     images: section.images?.length ? [...section.images] : [],
     body: section.body?.trim() ?? "",

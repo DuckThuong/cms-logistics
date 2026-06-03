@@ -12,6 +12,11 @@ export const filterSectionsByKind = (
 
 export const DEFAULT_DESCRIPTION_TYPE = "text";
 
+export const ABOUT_CONTENT_DESCRIPTION_TYPES = ["text", "text-bullet"] as const;
+
+export type AboutContentDescriptionType =
+  (typeof ABOUT_CONTENT_DESCRIPTION_TYPES)[number];
+
 export const emptyDescriptionItem = (): AboutSectionDescription => ({
   icon: "",
   text: "",

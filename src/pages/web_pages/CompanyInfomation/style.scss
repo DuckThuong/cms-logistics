@@ -189,6 +189,11 @@ $transition-base: all 0.25s ease;
     }
   }
 
+  &__content-type-select {
+    flex: 0 0 140px;
+    min-width: 140px;
+  }
+
   &__quick-links-hint {
     margin: -8px 0 12px;
     font-size: 12px;
