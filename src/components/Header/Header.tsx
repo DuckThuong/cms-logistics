@@ -1,3 +1,4 @@
+import { BRAND } from "@/common/constants/constants";
 import { useUser } from "@/common/contexts/UserContext";
 import { ROUTER_PATH } from "@/routers/Route";
 import { BellOutlined, SearchOutlined } from "@ant-design/icons";
@@ -24,17 +25,14 @@ const Header = () => {
       <div className="hk-header__inner">
         {/* ── Logo ── */}
         <a className="hk-header__logo" href={`/${ROUTER_PATH.DASHBOARD}`}>
-          <div className="hk-header__logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M2 16l3-8h14l3 8H2z" fill="currentColor" opacity="0.9" />
-              <rect x="5" y="16" width="4" height="4" rx="2" fill="currentColor" opacity="0.7" />
-              <rect x="15" y="16" width="4" height="4" rx="2" fill="currentColor" opacity="0.7" />
-              <path d="M9 11l1.5-4h3L15 11" stroke="white" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.55" />
-            </svg>
-          </div>
+          <img
+            src={BRAND.logoSrc}
+            alt={BRAND.name}
+            className="hk-header__logo-img"
+          />
           <div className="hk-header__logo-text">
-            <span className="hk-header__logo-name">LogiCMS</span>
-            <span className="hk-header__logo-sub">Admin Dashboard</span>
+            <span className="hk-header__logo-name">{BRAND.namePrimary}</span>
+            <span className="hk-header__logo-sub">{BRAND.cmsSubtitle}</span>
           </div>
         </a>
 

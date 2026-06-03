@@ -83,7 +83,7 @@ const ensureOtherOption = (opt: PriceOtherOption): PriceOtherOption => ({
 });
 
 export const migratePriceHub = (data: PriceHubContent): PriceHubContent => ({
-  seoUrl: data.seoUrl?.trim() || "/bang-gia",
+  seoUrl: data.seoUrl?.trim() || "bang-gia",
   name: data.name ?? "",
   shortDescription: data.shortDescription ?? "",
   content: data.content ?? "",
@@ -94,7 +94,7 @@ export const migratePriceHub = (data: PriceHubContent): PriceHubContent => ({
 });
 
 export const migratePriceDetail = (data: PriceDetailContent): PriceDetailContent => {
-  const url = data.url?.trim() || slugify(data.shortDescription || data.name || data.id);
+  const url = data.url?.trim() || "price";
   return {
     id: data.id?.trim() || newId("price"),
     name: data.name ?? "",

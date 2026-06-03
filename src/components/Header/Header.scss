@@ -1,21 +1,21 @@
 // ─── Logistics Header Variables ───────────────────────────────────────────────
-$lo:          #ff6a00;
-$lo-dark:     #e55d00;
-$lo-light:    #ff8533;
-$lo-soft:     #ffb380;
-$lo-bg:       rgba(255, 106, 0, 0.10);
-$lo-border:   rgba(255, 106, 0, 0.28);
-$lo-glow:     rgba(255, 106, 0, 0.18);
+$lo: #ff6a00;
+$lo-dark: #e55d00;
+$lo-light: #ff8533;
+$lo-soft: #ffb380;
+$lo-bg: rgba(255, 106, 0, 0.1);
+$lo-border: rgba(255, 106, 0, 0.28);
+$lo-glow: rgba(255, 106, 0, 0.18);
 
-$header-bg:        #0f0e1c;
-$header-border:    rgba(255, 255, 255, 0.06);
-$header-height:    64px;
+$header-bg: #0f0e1c;
+$header-border: rgba(255, 255, 255, 0.06);
+$header-height: 64px;
 
-$text-white:       #f1f5f9;
-$text-secondary:   #94a3b8;
-$text-muted:       #64748b;
-$input-bg:         rgba(255, 255, 255, 0.04);
-$hover-bg:         rgba(255, 255, 255, 0.05);
+$text-white: #f1f5f9;
+$text-secondary: #94a3b8;
+$text-muted: #64748b;
+$input-bg: rgba(255, 255, 255, 0.04);
+$hover-bg: rgba(255, 255, 255, 0.05);
 
 $radius-sm: 8px;
 $radius-md: 12px;
@@ -43,7 +43,11 @@ $transition-base: all 0.25s ease;
     left: 0;
     width: 280px;
     height: 100%;
-    background: radial-gradient(ellipse at 0% 50%, rgba(255, 106, 0, 0.07) 0%, transparent 70%);
+    background: radial-gradient(
+      ellipse at 0% 50%,
+      rgba(255, 106, 0, 0.07) 0%,
+      transparent 70%
+    );
     pointer-events: none;
   }
 
@@ -67,6 +71,10 @@ $transition-base: all 0.25s ease;
     padding: 0 20px;
     gap: 16px;
   }
+
+  &__icon-btn {
+    background-color: #f1f5f9 !important;
+  }
 }
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
@@ -77,36 +85,36 @@ $transition-base: all 0.25s ease;
   gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
+  min-width: 0;
   transition: $transition-fast;
 
-  &:hover .hk-header__logo-icon {
-    box-shadow: 0 0 18px $lo-glow;
-    transform: scale(1.04);
+  &:hover .hk-header__logo-img {
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 12px $lo-glow);
   }
 }
 
-.hk-header__logo-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: $radius-sm;
-  background: linear-gradient(135deg, $lo 0%, $lo-light 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+.hk-header__logo-img {
+  height: 40px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  display: block;
   flex-shrink: 0;
   transition: $transition-base;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
 }
 
 .hk-header__logo-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  justify-content: center;
+  line-height: 1.15;
+  gap: 1px;
+  min-width: 0;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
 }
 
 .hk-header__logo-name {
@@ -114,14 +122,16 @@ $transition-base: all 0.25s ease;
   font-weight: 700;
   color: $text-white;
   letter-spacing: -0.3px;
+  white-space: nowrap;
 }
 
 .hk-header__logo-sub {
   font-size: 10px;
   color: $text-muted;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -250,7 +260,7 @@ $transition-base: all 0.25s ease;
 
   &:hover {
     background: $hover-bg;
-    border-color: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.1);
     color: $text-white;
 
     .hk-header__profile-chevron {

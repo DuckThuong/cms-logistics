@@ -1,6 +1,7 @@
 import { InboxOutlined } from "@ant-design/icons";
 import { Image, Upload, message } from "antd";
 import type { UploadRequestOption } from "rc-upload/lib/interface";
+import { uploadFile } from "@/api/config/fileApi";
 
 type ImageUploadFieldProps = {
   value?: string;
@@ -8,25 +9,19 @@ type ImageUploadFieldProps = {
   label?: string;
 };
 
-const fileToDataUrl = (file: File) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("FileReader failed"));
-    reader.readAsDataURL(file);
-  });
-
 export const ImageUploadField = ({ value, onChange, label }: ImageUploadFieldProps) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const customRequest = async (options: UploadRequestOption) => {
     try {
       const file = options.file as File;
-      const dataUrl = await fileToDataUrl(file);
-      onChange?.(dataUrl);
-      options.onSuccess?.({ url: dataUrl }, new XMLHttpRequest());
+      const url = await uploadFile(file);
+      onChange?.(url);
+      options.onSuccess?.({ url }, new XMLHttpRequest());
+      messageApi.success("Upload thành công!");
     } catch (error) {
       options.onError?.(error as Error);
+      messageApi.error("Upload thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -36,9 +31,9 @@ export const ImageUploadField = ({ value, onChange, label }: ImageUploadFieldPro
       messageApi.error("Vui lòng chọn file ảnh (png/jpg/webp/...)");
       return Upload.LIST_IGNORE;
     }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      messageApi.error("Ảnh phải nhỏ hơn 2MB");
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      messageApi.error("Ảnh phải nhỏ hơn 5MB");
       return Upload.LIST_IGNORE;
     }
     return true;
@@ -59,7 +54,7 @@ export const ImageUploadField = ({ value, onChange, label }: ImageUploadFieldPro
           <InboxOutlined />
         </p>
         <p className="ant-upload-text">Kéo thả ảnh vào đây hoặc bấm để chọn</p>
-        <p className="ant-upload-hint">Tối đa 2MB. Ảnh sẽ được lưu dạng DataURL (tạm thời).</p>
+        <p className="ant-upload-hint">Tối đa 5MB. Ảnh sẽ được upload lên server.</p>
       </Upload.Dragger>
 
       {value ? (
@@ -70,4 +65,3 @@ export const ImageUploadField = ({ value, onChange, label }: ImageUploadFieldPro
     </div>
   );
 };
-

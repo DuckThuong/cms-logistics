@@ -9,6 +9,7 @@ export interface AboutOptionsDto {
 export interface AboutDescriptionDto {
   icon: string;
   text: string;
+  type: string;
 }
 
 export interface AboutSectionDto {

@@ -40,6 +40,7 @@ export interface ServiceOptionsDto {
 export interface ServiceDescriptionDto {
   icon: string;
   text: string;
+  type?: string;
 }
 
 export interface ServiceFeaturedDto {
@@ -115,4 +116,25 @@ export interface ServiceByIdResponseDto {
   sections: ServiceDetailSectionDto[];
   createdAt: string;
   updatedAt: string;
+}
+
+/** Section gửi lên API (không có id/pageId/createdAt). */
+export type ServiceSectionPayloadDto = Omit<
+  ServiceDetailSectionDto,
+  "id" | "pageId" | "pageTitle" | "createdAt" | "updatedAt"
+>;
+
+/** Body lưu page SERVICE từ CMS. */
+export interface ServicePageWritePayloadDto {
+  name: string;
+  url: string;
+  shortDescription: string;
+  content: string;
+  otherOptions?: ServiceOptionsDto[];
+  sections?: ServiceSectionPayloadDto[];
+  type?: string;
+  parentId?: number | null;
+  image?: string | null;
+  active?: boolean;
+  sortIndex?: number;
 }

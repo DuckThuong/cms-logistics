@@ -1,53 +1,198 @@
 import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Space, message } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Form, Input, Space } from "antd";
+import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  createPage,
+  getServiceById,
+  getServiceContent,
+  updatePage,
+} from "@/api/config/common.config";
+import type { ServiceChildDto } from "@/api/dtos/service.response";
+import { CONTENT_ENDPOINTS } from "@/api/endpoints/common.endpoint";
+import {
+  DEFAULT_MESSAGE,
+  NOTI_ERROR,
+  NOTI_SUCCESS,
+} from "@/common/constants/constants";
+import { normalizeServiceDetailContent } from "@/common/contexts/serviceNormalize";
+import { mapResponseToServiceDetail, mapResponseToServiceHub } from "@/common/utils/mapFromServiceResponse";
+import { mapServiceDetailToApi, mapSavedChildToListItem } from "@/common/utils/mapToServiceApi";
+import { parseNumericId } from "@/common/utils/parseNumericId";
 import { slugify } from "@/common/utils/seoUrl";
+import { useLoading } from "@/providers/loadingProvider";
+import { useNotification } from "@/providers/notificationProvider";
 import { ROUTER_PATH } from "@/routers/Route";
 import { ImageUploadField } from "../../CompanyInfomation/components/ImageUploadField";
 import { ServiceDetailClientPreview } from "../components/ServiceDetailClientPreview";
 import { ServiceSectionsEditor } from "../components/ServiceSectionsEditor";
-import { migrateServiceDetail } from "@/common/contexts/serviceMigrate";
-import { loadServiceDetail, loadServiceHub, saveServiceDetail } from "../storage";
 import type { ServiceDetailContent } from "@/common/types/service";
 import "../../CompanyInfomation/style.scss";
 
 type ViewMode = "cms" | "client";
 
+type SaveServiceDetailVariables = {
+  content: ServiceDetailContent;
+  pageId: number;
+  hubPageId: number;
+};
+
 export const ServiceDetailEditorPage = () => {
   const { serviceId = "" } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
+  const { setLoading } = useLoading();
+  const { showNotification } = useNotification();
   const [content, setContent] = useState<ServiceDetailContent | null>(null);
   const [hubName, setHubName] = useState("Dịch vụ");
   const [listLabel, setListLabel] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const [hubPageId, setHubPageId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("cms");
-  const [messageApi, contextHolder] = message.useMessage();
+
+  const numericId = parseNumericId(serviceId);
+
+  const { data: hubPage } = useQuery({
+    queryKey: [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
+    queryFn: () => getServiceContent(),
+    throwOnError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+      return false;
+    },
+  });
+
+  const hubContent = useMemo(
+    () => (hubPage ? mapResponseToServiceHub(hubPage) : null),
+    [hubPage],
+  );
+
+  const listItem = useMemo(
+    () => hubContent?.children.find((c) => c.id === serviceId || String(parseNumericId(c.id)) === String(numericId)),
+    [hubContent, serviceId, numericId],
+  );
+
+  const { data: detailPage, isLoading } = useQuery({
+    queryKey: [CONTENT_ENDPOINTS.GET_SERVICE_BY_ID, numericId],
+    queryFn: () => getServiceById(numericId),
+    enabled: numericId > 0,
+    throwOnError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+      return false;
+    },
+  });
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
+
+  useEffect(() => {
+    if (!hubPage) {
+      return;
+    }
+    setHubPageId(hubPage.id);
+    setHubName(hubPage.name ?? "Dịch vụ");
+  }, [hubPage]);
 
   useEffect(() => {
     if (!serviceId) {
       return;
     }
-    const hub = loadServiceHub();
-    const listItem = hub.children.find((c) => c.id === serviceId);
-    if (!listItem) {
-      messageApi.warning("Không tìm thấy dịch vụ trong danh sách hub.");
+    if (numericId <= 0) {
+      showNotification(
+        "Dịch vụ chưa có trên server. Hãy lưu hub trước khi chỉnh chi tiết.",
+        NOTI_ERROR,
+      );
       navigate(ROUTER_PATH.SERVICE);
       return;
     }
-    setHubName(hub.name);
-    setListLabel(listItem.shortDescription);
-    const detail = loadServiceDetail(serviceId);
+    if (!detailPage || !hubContent) {
+      return;
+    }
+    if (!listItem) {
+      showNotification("Không tìm thấy dịch vụ trong danh sách hub.", NOTI_ERROR);
+      navigate(ROUTER_PATH.SERVICE);
+      return;
+    }
+
+    const mapped = mapResponseToServiceDetail(detailPage);
+    setListLabel(listItem.shortDescription ?? mapped.name);
     setContent(
-      migrateServiceDetail({
-        ...detail,
-        id: serviceId,
-        name: detail.name || listItem.shortDescription,
-        url: detail.url || listItem.url,
-        image: detail.image || listItem.image,
+      normalizeServiceDetailContent({
+        ...mapped,
+        id: String(detailPage.id),
+        name: mapped.name || listItem.shortDescription || "",
+        url: mapped.url || listItem.url || "",
+        image: mapped.image || listItem.image || "",
       }),
     );
-  }, [serviceId, navigate, messageApi]);
+  }, [
+    serviceId,
+    numericId,
+    detailPage,
+    hubContent,
+    listItem,
+    navigate,
+    showNotification,
+  ]);
+
+  const saveMutation = useMutation({
+    mutationFn: async ({
+      content: draft,
+      pageId,
+      hubPageId: parentId,
+    }: SaveServiceDetailVariables) => {
+      const normalized = normalizeServiceDetailContent(draft);
+      const payload = mapServiceDetailToApi(normalized, {
+        parentId,
+        listItem: listItem ?? undefined,
+      });
+      const result =
+        pageId > 0
+          ? await updatePage<ServiceChildDto>(pageId, payload)
+          : await createPage<ServiceChildDto>(payload);
+      return {
+        normalized,
+        result: mapSavedChildToListItem(result),
+      };
+    },
+    onSuccess: ({ normalized }) => {
+      setContent(normalized);
+      showNotification(
+        `Đã cập nhật nội dung chi tiết: ${normalized.name || listLabel}.`,
+        NOTI_SUCCESS,
+      );
+    },
+    onError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+    },
+  });
 
   const updateField = <K extends keyof ServiceDetailContent>(
     field: K,
@@ -56,25 +201,23 @@ export const ServiceDetailEditorPage = () => {
     setContent((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
-  const handleSave = async () => {
-    if (!content) {
+  const handleSave = () => {
+    if (!content || hubPageId == null || numericId <= 0) {
       return;
     }
-    setIsSaving(true);
-    try {
-      const payload = migrateServiceDetail(content);
-      saveServiceDetail(payload);
-      setContent(payload);
-      messageApi.success(`Đã lưu nội dung chi tiết: ${payload.name || listLabel}.`);
-    } finally {
-      setIsSaving(false);
-    }
+    saveMutation.mutate({
+      content,
+      pageId: numericId,
+      hubPageId,
+    });
   };
 
   const previewContent = useMemo(
-    () => (content ? migrateServiceDetail(content) : null),
+    () => (content ? normalizeServiceDetailContent(content) : null),
     [content],
   );
+
+  const isSaving = saveMutation.isPending;
 
   if (!content) {
     return null;
@@ -83,7 +226,6 @@ export const ServiceDetailEditorPage = () => {
   if (viewMode === "client" && previewContent) {
     return (
       <div className="company-information-page company-information-page--client-view">
-        {contextHolder}
         <ServiceDetailClientPreview content={previewContent} hubName={hubName} />
         <div className="company-information-page__bottom-actions">
           <Button icon={<ArrowLeftOutlined />} onClick={() => setViewMode("cms")}>
@@ -104,7 +246,6 @@ export const ServiceDetailEditorPage = () => {
 
   return (
     <div className="company-information-page">
-      {contextHolder}
       <div className="company-information-page__header">
         <div className="company-information-page__header-text">
           <h1 className="company-information-page__title">

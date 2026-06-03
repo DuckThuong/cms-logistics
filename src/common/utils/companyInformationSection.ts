@@ -10,8 +10,21 @@ export const filterSectionsByKind = (
     .filter((section) => section.kind === kind)
     .sort((a, b) => a.sortIndex - b.sortIndex);
 
+export const DEFAULT_DESCRIPTION_TYPE = "text";
+
+export const ABOUT_CONTENT_DESCRIPTION_TYPES = ["text", "text-bullet"] as const;
+
+export type AboutContentDescriptionType =
+  (typeof ABOUT_CONTENT_DESCRIPTION_TYPES)[number];
+
+export const emptyDescriptionItem = (): AboutSectionDescription => ({
+  icon: "",
+  text: "",
+  type: DEFAULT_DESCRIPTION_TYPE,
+});
+
 export const linesToDescription = (lines: string[]): AboutSectionDescription[] =>
-  lines.map((text) => ({ icon: "", text }));
+  lines.map((text) => ({ icon: "", text, type: DEFAULT_DESCRIPTION_TYPE }));
 
 export const descriptionToLines = (description: AboutSectionDescription[]): string[] =>
   description.length > 0 ? description.map((item) => item.text) : [""];

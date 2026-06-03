@@ -1,11 +1,22 @@
 import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Space, message } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Form, Input, Space } from "antd";
+import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
-import { anchorFromTitle } from "@/common/utils/anchor";
-import { normalizeSeoUrl } from "@/common/utils/seoUrl";
-import { COMPANY_INFORMATION_DEFAULTS } from "@/common/constants/companyInformation";
-import { migrateCompanyInformationContent } from "@/common/contexts/companyInformationMigrate";
+import {
+  createPage,
+  getAboutContent,
+  updatePage,
+} from "@/api/config/common.config";
+import { CONTENT_ENDPOINTS } from "@/api/endpoints/common.endpoint";
+import {
+  DEFAULT_MESSAGE,
+  NOTI_ERROR,
+  NOTI_SUCCESS,
+} from "@/common/constants/constants";
 import { normalizeCompanyInformationContent } from "@/common/contexts/companyInformationNormalize";
+import type { CompanyInformationContent } from "@/common/types/companyInformation";
+import { anchorFromTitle } from "@/common/utils/anchor";
 import {
   getHighlightOptions,
   getQuickLinkOptions,
@@ -15,47 +26,110 @@ import {
 } from "@/common/utils/companyInformationOtherOptions";
 import {
   filterSectionsByKind,
-  getClosingLines,
   reindexSections,
   replaceSectionsByKind,
-  upsertClosingSection,
 } from "@/common/utils/companyInformationSection";
+import { mapResponseToCompanyInformation } from "@/common/utils/mapFromApiResponse";
+import { mapCompanyInformationToAboutApi } from "@/common/utils/mapToAboutApi";
+import { normalizeSeoUrl } from "@/common/utils/seoUrl";
+import { useLoading } from "@/providers/loadingProvider";
+import { useNotification } from "@/providers/notificationProvider";
 import { CompanyInformationClientPreview } from "./components/CompanyInformationClientPreview";
 import { ExtraFieldsEditor } from "./components/ExtraFieldsEditor";
 import { HighlightListEditor } from "./components/HighlightListEditor";
 import { ImageUploadField } from "./components/ImageUploadField";
 import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
-import { SectionsEditor } from "./components/SectionsEditor";
+import { PolicySectionsEditor } from "./components/PolicySectionsEditor";
 import { SeoSection } from "./components/SeoSection";
-import type { CompanyInformationContent } from "@/common/types/companyInformation";
+import { EMPTY_COMPANY_INFORMATION_CONTENT } from "./emptyCompanyInformationContent";
 import "./style.scss";
 
 const { TextArea } = Input;
 
 type ViewMode = "cms" | "client";
 
+type SaveCompanyInformationVariables = {
+  content: CompanyInformationContent;
+  pageId: number | null;
+};
+
 export const CompanyInformationPage = () => {
+  const { setLoading } = useLoading();
+  const { showNotification } = useNotification();
   const [content, setContent] = useState<CompanyInformationContent>(
-    COMPANY_INFORMATION_DEFAULTS,
+    EMPTY_COMPANY_INFORMATION_CONTENT,
   );
-  const [isSaving, setIsSaving] = useState(false);
+  const [pageId, setPageId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("cms");
-  const [messageApi, contextHolder] = message.useMessage();
+
+  const { data: aboutPage, isLoading } = useQuery({
+    queryKey: [CONTENT_ENDPOINTS.GET_ABOUT_CONTENT],
+    queryFn: () => getAboutContent(),
+    throwOnError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+      return false;
+    },
+  });
 
   useEffect(() => {
-    const savedData = localStorage.getItem("cms.company-information.about");
-    if (!savedData) {
+    if (!aboutPage) {
       return;
     }
-    try {
-      const parsedData = JSON.parse(savedData) as CompanyInformationContent;
-      setContent(migrateCompanyInformationContent(parsedData as any));
-    } catch {
-      messageApi.warning("Không thể đọc dữ liệu đã lưu trước đó.");
-    }
-  }, [messageApi]);
+    setContent(mapResponseToCompanyInformation(aboutPage));
+    setPageId(aboutPage.id);
+  }, [aboutPage]);
 
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
+
+  const saveMutation = useMutation({
+    mutationFn: async ({
+      content: draft,
+      pageId: currentPageId,
+    }: SaveCompanyInformationVariables) => {
+      const normalized = normalizeCompanyInformationContent(draft);
+      const payload = mapCompanyInformationToAboutApi(normalized);
+      const result =
+        currentPageId != null
+          ? await updatePage(currentPageId, payload)
+          : await createPage(payload);
+      return { result, normalized };
+    },
+    onSuccess: ({ result, normalized }, variables) => {
+      setPageId(result.id);
+      setContent(normalized);
+      const wasUpdate = variables.pageId != null;
+      showNotification(
+        wasUpdate
+          ? `Đã cập nhật thành công! Page ID: ${result.id}`
+          : `Đã tạo mới thành công! Page ID: ${result.id}`,
+        NOTI_SUCCESS,
+      );
+    },
+    onError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+    },
+  });
   const normalizedSeoUrl = useMemo(
     () => normalizeSeoUrl(content.seoUrl),
     [content.seoUrl],
@@ -77,12 +151,11 @@ export const CompanyInformationPage = () => {
   );
 
   const contentSections = useMemo(
-    () => filterSectionsByKind(content.sections, "content"),
-    [content.sections],
-  );
-
-  const [closingLineOne, closingLineTwo] = useMemo(
-    () => getClosingLines(content.sections),
+    () =>
+      [
+        ...filterSectionsByKind(content.sections, "content"),
+        ...filterSectionsByKind(content.sections, "closing"),
+      ].sort((a, b) => a.sortIndex - b.sortIndex),
     [content.sections],
   );
 
@@ -118,15 +191,14 @@ export const CompanyInformationPage = () => {
     );
   };
 
-  const updateContentSections = (nextContent: typeof contentSections) => {
+  const updateContentSections = (nextSections: typeof contentSections) => {
+    const nextContent = nextSections.filter((section) => section.kind === "content");
+    const nextClosing = nextSections.filter((section) => section.kind === "closing");
+    const policy = filterSectionsByKind(content.sections, "policy");
     updateField(
       "sections",
-      reindexSections(replaceSectionsByKind(content.sections, "content", nextContent)),
+      reindexSections([...policy, ...nextContent, ...nextClosing]),
     );
-  };
-
-  const updateClosing = (lineOne: string, lineTwo: string) => {
-    updateField("sections", reindexSections(upsertClosingSection(content.sections, lineOne, lineTwo)));
   };
 
   const handleHighlightChange = (highlights: typeof highlightOptions) => {
@@ -140,22 +212,14 @@ export const CompanyInformationPage = () => {
     );
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      const payload = normalizeCompanyInformationContent(content);
-      localStorage.setItem("cms.company-information.about", JSON.stringify(payload));
-      setContent(payload);
-      messageApi.success("Đã lưu nội dung Company Information (kèm SEO URL).");
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSave = () => {
+    saveMutation.mutate({ content, pageId });
   };
 
+  const isSaving = saveMutation.isPending;
   if (viewMode === "client") {
     return (
       <div className="company-information-page company-information-page--client-view">
-        {contextHolder}
         <CompanyInformationClientPreview content={contentForPreview} />
         <div className="company-information-page__bottom-actions">
           <Button
@@ -179,7 +243,6 @@ export const CompanyInformationPage = () => {
 
   return (
     <div className="company-information-page">
-      {contextHolder}
       <div className="company-information-page__header">
         <div className="company-information-page__header-text">
           <h1 className="company-information-page__title">
@@ -256,17 +319,8 @@ export const CompanyInformationPage = () => {
                   }}
                 />
               </Form.Item>
-              <Form.Item label="Liên kết nhanh (anchor)">
-                <Input
-                  value={content.intro.anchor}
-                  placeholder="gioi-thieu-tong-quan"
-                  onChange={(event) =>
-                    setContent((prev) => ({
-                      ...prev,
-                      intro: { ...prev.intro, anchor: event.target.value },
-                    }))
-                  }
-                />
+              <Form.Item label="Anchor">
+                <Input value={content.intro.anchor} disabled />
               </Form.Item>
             </div>
             <Form.Item label="Nội dung">
@@ -281,17 +335,16 @@ export const CompanyInformationPage = () => {
                 }
               />
             </Form.Item>
-            <Form.Item label="Ảnh minh hoạ (imageUrl)">
-              <ImageUploadField
-                value={content.intro.imageUrl}
-                onChange={(nextValue) =>
-                  setContent((prev) => ({
-                    ...prev,
-                    intro: { ...prev.intro, imageUrl: nextValue },
-                  }))
-                }
-              />
-            </Form.Item>
+            <ImageUploadField
+              label="Ảnh giới thiệu"
+              value={content.intro.imageUrl}
+              onChange={(url) =>
+                setContent((prev) => ({
+                  ...prev,
+                  intro: { ...prev.intro, imageUrl: url },
+                }))
+              }
+            />
           </Form>
         </section>
 
@@ -300,54 +353,41 @@ export const CompanyInformationPage = () => {
           onChange={handleHighlightChange}
         />
 
-        <ServicesRefusalsEditor
-          sections={policySections}
+        <QuickLinksAutoPanel
+          title="Quick Links"
+          values={quickLinkOptions}
+          onIconChange={handleQuickLinkIconChange}
+        />
+
+        <PolicySectionsEditor
+          title="Khối Chính sách"
+          values={policySections}
           onChange={updatePolicySections}
         />
 
-        <SectionsEditor
-          title="Các khối nội dung tuỳ biến (sections — content)"
+        <ServicesRefusalsEditor
+          title="Mục nội dung"
           values={contentSections}
           onChange={updateContentSections}
         />
 
-        <QuickLinksAutoPanel
-          links={quickLinkOptions}
-          onIconChange={handleQuickLinkIconChange}
-        />
-
-        <section className="company-information-page__section-card">
-          <h3>Lời kết (sections — closing)</h3>
-          <Form layout="vertical">
-            <Form.Item label="Dòng 1 (description[0])">
-              <Input
-                value={closingLineOne}
-                onChange={(event) => updateClosing(event.target.value, closingLineTwo)}
-              />
-            </Form.Item>
-            <Form.Item label="Dòng 2 (description[1])">
-              <Input
-                value={closingLineTwo}
-                onChange={(event) => updateClosing(closingLineOne, event.target.value)}
-              />
-            </Form.Item>
-          </Form>
-        </section>
+        <div className="company-information-page__actions">
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => setViewMode("client")}
+          >
+            Xem trước
+          </Button>
+          <Button
+            type="primary"
+            icon={<SaveOutlined />}
+            loading={isSaving}
+            onClick={handleSave}
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
       </Space>
-
-      <div className="company-information-page__bottom-actions">
-        <Button icon={<EyeOutlined />} onClick={() => setViewMode("client")}>
-          Xem trước Client
-        </Button>
-        <Button
-          type="primary"
-          icon={<SaveOutlined />}
-          loading={isSaving}
-          onClick={handleSave}
-        >
-          Lưu thay đổi
-        </Button>
-      </div>
     </div>
   );
 };
