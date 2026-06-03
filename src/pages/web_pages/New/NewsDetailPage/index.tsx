@@ -26,7 +26,7 @@ import { useLoading } from "@/providers/loadingProvider";
 import { useNotification } from "@/providers/notificationProvider";
 import { ROUTER_PATH } from "@/routers/Route";
 import { ImageUploadField } from "../../CompanyInfomation/components/ImageUploadField";
-import { ServiceSectionsEditor } from "../../Service/components/ServiceSectionsEditor";
+import { NewsSectionsEditor } from "../components/NewsSectionsEditor";
 import { NewsDetailClientPreview } from "../components/NewsDetailClientPreview";
 import type { NewsDetailContent } from "@/common/types/news";
 import "../../CompanyInfomation/style.scss";
@@ -313,7 +313,7 @@ export const NewsDetailEditorPage = () => {
           </Form>
         </section>
 
-        <ServiceSectionsEditor
+        <NewsSectionsEditor
           values={content.sections}
           onChange={(next) => updateField("sections", next)}
         />

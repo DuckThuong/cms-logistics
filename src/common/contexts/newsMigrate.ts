@@ -1,5 +1,11 @@
-import { migrateServiceDetail } from "@/common/contexts/serviceMigrate";
-import type { NewsDetailContent, NewsHubContent, NewsListItem } from "@/common/types/news";
+import type {
+  NewsDetailContent,
+  NewsDetailSection,
+  NewsHubContent,
+  NewsListItem,
+  NewsSectionDescription,
+} from "@/common/types/news";
+import { DEFAULT_DESCRIPTION_TYPE } from "@/common/utils/companyInformationSection";
 import { slugify } from "@/common/utils/seoUrl";
 
 const newId = (prefix: string) =>
@@ -31,22 +37,36 @@ export const migrateNewsHub = (data: NewsHubContent): NewsHubContent => ({
     .sort((a, b) => a.sortIndex - b.sortIndex),
 });
 
+const ensureDescriptions = (
+  descriptions: NewsSectionDescription[] | undefined,
+): NewsSectionDescription[] =>
+  (descriptions ?? []).map((item, index) => ({
+    id: item.id?.trim() || newId("desc"),
+    text: item.text ?? "",
+    type: item.type?.trim() || DEFAULT_DESCRIPTION_TYPE,
+    img: item.img ?? "",
+    headers: item.headers?.length ? item.headers : null,
+  }));
+
+const ensureSections = (sections: NewsDetailSection[] | undefined): NewsDetailSection[] =>
+  (sections ?? []).map((section, index) => ({
+    id: section.id?.trim() || newId("sec"),
+    title: section.title ?? "",
+    descriptions: ensureDescriptions(section.descriptions),
+    sortIndex: section.sortIndex ?? index + 1,
+    active: section.active ?? true,
+  }));
+
 export const migrateNewsDetail = (data: NewsDetailContent): NewsDetailContent => {
-  const migrated = migrateServiceDetail({
-    id: data.id,
-    name: data.name,
-    url: data.url,
-    image: data.image,
-    sections: data.sections,
-  });
+  const url = data.url?.trim() || slugify(data.shortDescription || data.id);
 
   return {
-    id: migrated.id,
+    id: data.id?.trim() || newId("news"),
     name: data.name?.trim() || "Tin tức",
-    shortDescription: data.shortDescription ?? migrated.name,
-    url: migrated.url,
-    image: migrated.image,
+    shortDescription: data.shortDescription ?? "",
+    url,
+    image: data.image ?? "",
     publishDate: data.publishDate ?? "",
-    sections: migrated.sections,
+    sections: ensureSections(data.sections).sort((a, b) => a.sortIndex - b.sortIndex),
   };
 };

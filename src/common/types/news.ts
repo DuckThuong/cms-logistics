@@ -1,14 +1,17 @@
-import type {
-  ServiceDetailSection,
-  ServiceSectionDescription,
-} from "@/common/types/service";
+import type { ServiceSectionDescription } from "@/common/types/service";
 
 /** Mô tả section tin tức — cùng cấu trúc dịch vụ, thêm ảnh cho text-img */
 export type NewsSectionDescription = ServiceSectionDescription & {
   img?: string;
 };
 
-export type NewsDetailSection = ServiceDetailSection;
+export interface NewsDetailSection {
+  id: string;
+  title: string;
+  descriptions: NewsSectionDescription[];
+  sortIndex: number;
+  active: boolean;
+}
 
 /** Thẻ tin trên hub — khớp FE children[] */
 export interface NewsListItem {

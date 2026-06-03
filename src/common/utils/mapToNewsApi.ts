@@ -14,19 +14,25 @@ import type {
 import { mapChildDtoToNewsListItem } from "@/common/utils/mapFromNewsResponse";
 import { DEFAULT_DESCRIPTION_TYPE } from "@/common/utils/companyInformationSection";
 import { buildSectionTitle } from "@/common/utils/sectionTitle";
-import type { ServiceSectionDescription } from "@/common/types/service";
+import { isNewsTextImgType } from "@/common/constants/newsDescriptionTypes";
+import type { NewsSectionDescription } from "@/common/types/news";
 
 const mapDescriptionToApi = (
-  desc: ServiceSectionDescription,
-): NewsSectionDescriptionDto => ({
-  type: desc.type?.trim() || DEFAULT_DESCRIPTION_TYPE,
-  icon: "",
-  img: null,
-  text: desc.text ?? "",
-  boldParts: [],
-  headers: desc.headers?.length ? desc.headers : null,
-  cellRows: [],
-});
+  desc: NewsSectionDescription,
+): NewsSectionDescriptionDto => {
+  const type = desc.type?.trim() || DEFAULT_DESCRIPTION_TYPE;
+  const img = isNewsTextImgType(type) ? desc.img?.trim() || null : null;
+
+  return {
+    type,
+    icon: "",
+    img,
+    text: desc.text ?? "",
+    boldParts: [],
+    headers: desc.headers?.length ? desc.headers : null,
+    cellRows: [],
+  };
+};
 
 const mapSectionToApi = (
   section: NewsDetailSection,

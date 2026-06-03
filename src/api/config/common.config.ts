@@ -9,8 +9,11 @@ import type {
   ServicePageWritePayloadDto,
   ServiceResponseDto,
 } from "../dtos/service.response";
-import type { NewsPageWritePayloadDto } from "@/api/dtos/news.response";
-import type { NewsChildDto, NewsContentDto } from "@/api/dtos/news.response";
+import type {
+  NewsChildDto,
+  NewsContentDto,
+  NewsPageWritePayloadDto,
+} from "@/api/dtos/news.response";
 import type { PricePageWritePayloadDto } from "@/common/utils/mapToPriceApi";
 import {
   COMMON_ENDPOINT,

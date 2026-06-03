@@ -1,6 +1,7 @@
 import { CalendarOutlined, HomeOutlined } from "@ant-design/icons";
 import { Breadcrumb } from "antd";
-import type { NewsDetailContent } from "@/common/types/news";
+import type { NewsDetailContent, NewsSectionDescription } from "@/common/types/news";
+import { isNewsTextImgType } from "@/common/constants/newsDescriptionTypes";
 import "../../Service/components/ServiceHubClientPreview.scss";
 import "../../Service/components/ServiceDetailClientPreview.scss";
 
@@ -14,6 +15,45 @@ const stripHtml = (html: string) => html.replace(/<[^>]+>/g, "").trim();
 const headingText = (title: string) => {
   const match = title.match(/^\d+\.\s*(.+)$/);
   return match?.[1]?.trim() || title;
+};
+
+const renderDescription = (desc: NewsSectionDescription, index: number) => {
+  const type = desc.type ?? "text";
+
+  if (isNewsTextImgType(type)) {
+    return (
+      <figure key={desc.id} className="svc-client-preview__figure">
+        {desc.img ? (
+          <img src={desc.img} alt={desc.text || "news-image"} style={{ maxWidth: "100%" }} />
+        ) : null}
+        {desc.text ? <figcaption>{desc.text}</figcaption> : null}
+      </figure>
+    );
+  }
+
+  if (type === "text-bullet") {
+    return <p key={desc.id}>• {desc.text}</p>;
+  }
+
+  if (type === "text-number") {
+    return (
+      <p key={desc.id}>
+        {index + 1}. {desc.text}
+      </p>
+    );
+  }
+
+  if (desc.text.includes("<")) {
+    return (
+      <div
+        key={desc.id}
+        className="svc-client-preview__html"
+        dangerouslySetInnerHTML={{ __html: desc.text }}
+      />
+    );
+  }
+
+  return <p key={desc.id}>{desc.text}</p>;
 };
 
 export const NewsDetailClientPreview = ({
@@ -50,13 +90,7 @@ export const NewsDetailClientPreview = ({
         {activeSections.map((section) => (
           <section key={section.id} className="svc-client-preview__article-section">
             <h3>{headingText(section.title) || stripHtml(section.title)}</h3>
-            {section.descriptions.map((desc) => (
-              <div
-                key={desc.id}
-                className="svc-client-preview__html"
-                dangerouslySetInnerHTML={{ __html: desc.text }}
-              />
-            ))}
+            {section.descriptions.map((desc, index) => renderDescription(desc, index))}
           </section>
         ))}
       </div>

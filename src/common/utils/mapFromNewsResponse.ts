@@ -64,6 +64,7 @@ const mapSections = (sections: NewsSectionDto[] | undefined): NewsDetailSection[
       id: `desc-${section.id ?? index}-${descIndex}`,
       text: desc.text ?? "",
       type: desc.type ?? DEFAULT_DESCRIPTION_TYPE,
+      img: desc.img ?? "",
       headers: desc.headers?.length ? desc.headers : null,
     })),
   }));
