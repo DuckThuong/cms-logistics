@@ -56,7 +56,8 @@ export const saveServiceHubToApi = async (
       existingSections = existing.sections ?? [];
     }
 
-    const childPayload = mapServiceChildCardToApi(child, hub.id, existingSections);
+    const hubPageId = hub.id;
+    const childPayload = mapServiceChildCardToApi(child, hubPageId, existingSections);
     const saved =
       childId > 0
         ? await updatePage<ServiceChildDto>(childId, childPayload)

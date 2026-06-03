@@ -65,12 +65,13 @@ export const mapServiceHubToApi = (
   sections: existingHubSections,
   type: "SERVICE",
   active: true,
+  parentId: null,
 });
 
-/** Thẻ dịch vụ (children) — giữ sections hiện có khi chỉ cập nhật metadata hub. */
+/** Thẻ dịch vụ (children) — parentId là id trang Hub (header) /dich-vu trên CMS. */
 export const mapServiceChildCardToApi = (
   child: ServiceListItem,
-  parentId: number,
+  hubPageId: number,
   existingSections: ServiceDetailSectionDto[] = [],
 ): ServicePageWritePayloadDto => ({
   name: child.name,
@@ -81,7 +82,7 @@ export const mapServiceChildCardToApi = (
   sortIndex: child.sortIndex,
   active: child.active ?? true,
   type: "SERVICE",
-  parentId,
+  parentId: hubPageId,
   otherOptions: [],
   sections: existingSections,
 });

@@ -8,8 +8,7 @@ import type {
 import { DEFAULT_DESCRIPTION_TYPE } from "@/common/utils/companyInformationSection";
 import { slugify } from "@/common/utils/seoUrl";
 
-const newId = (prefix: string) =>
-  `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+const newId = (prefix: string) => `${prefix}-local-${crypto.randomUUID()}`;
 
 const ensureListItem = (item: NewsListItem, index: number): NewsListItem => {
   const url =

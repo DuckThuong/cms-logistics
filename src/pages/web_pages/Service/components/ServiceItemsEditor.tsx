@@ -11,17 +11,19 @@ type ServiceItemCardModalProps = {
   mode: ServiceItemModalMode;
   initialValues: ServiceListItem | null;
   nextSortIndex: number;
+  confirmLoading?: boolean;
   onClose: () => void;
-  onSave: (item: ServiceListItem, mode: ServiceItemModalMode) => void;
+  onSave: (item: ServiceListItem, mode: ServiceItemModalMode) => void | Promise<void>;
 };
 
-const newId = () => `svc-${Math.random().toString(36).slice(2, 10)}`;
+const newId = () => `svc-local-${crypto.randomUUID()}`;
 
 export const ServiceItemCardModal = ({
   open,
   mode,
   initialValues,
   nextSortIndex,
+  confirmLoading = false,
   onClose,
   onSave,
 }: ServiceItemCardModalProps) => {
@@ -50,19 +52,23 @@ export const ServiceItemCardModal = ({
 
   const handleSubmit = async () => {
     const fields = await form.validateFields();
-    onSave(
-      {
-        id: fields.id.trim(),
-        name: fields.name.trim(),
-        shortDescription: fields.shortDescription.trim(),
-        image: fields.image?.trim() ?? "",
-        url: fields.url.trim() || slugify(fields.shortDescription || fields.name),
-        sortIndex: fields.sortIndex,
-        active: fields.active ?? true,
-      },
-      mode,
-    );
-    onClose();
+    try {
+      await onSave(
+        {
+          id: fields.id.trim(),
+          name: fields.name.trim(),
+          shortDescription: fields.shortDescription.trim(),
+          image: fields.image?.trim() ?? "",
+          url: fields.url.trim() || slugify(fields.shortDescription || fields.name),
+          sortIndex: fields.sortIndex,
+          active: fields.active ?? true,
+        },
+        mode,
+      );
+      onClose();
+    } catch {
+      // Giữ modal mở khi lưu API thất bại
+    }
   };
 
   return (
@@ -71,6 +77,7 @@ export const ServiceItemCardModal = ({
       open={open}
       onCancel={onClose}
       onOk={handleSubmit}
+      confirmLoading={confirmLoading}
       okText="Lưu"
       cancelText="Huỷ"
       

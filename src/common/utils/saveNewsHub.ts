@@ -51,7 +51,8 @@ export const saveNewsHubToApi = async (
       existingSections = existing.sections ?? [];
     }
 
-    const childPayload = mapNewsChildCardToApi(child, hub.id, existingSections);
+    const hubPageId = hub.id;
+    const childPayload = mapNewsChildCardToApi(child, hubPageId, existingSections);
     const saved =
       childId > 0
         ? await updatePage<NewsChildDto>(childId, childPayload)

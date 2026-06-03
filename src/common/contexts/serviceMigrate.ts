@@ -8,8 +8,7 @@ import type {
   ServiceSectionDescription,
 } from "@/common/types/service";
 
-const newId = (prefix: string) =>
-  `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+const newId = (prefix: string) => `${prefix}-local-${crypto.randomUUID()}`;
 
 const ensureDescriptions = (
   descriptions: ServiceSectionDescription[] | undefined,

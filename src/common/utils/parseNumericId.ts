@@ -1,9 +1,17 @@
-/** Lấy số từ id CMS (vd. "11", "svc-11") — dùng khi gọi API theo id page. */
+/** Lấy id page số từ id CMS (vd. "11", "svc-11"). Id tạm (news-local-...) trả về 0. */
 export const parseNumericId = (id: string): number => {
-  const digits = id.replace(/\D/g, "");
-  if (!digits) {
+  const trimmed = id.trim();
+  if (!trimmed) {
     return 0;
   }
-  const n = Number.parseInt(digits, 10);
-  return Number.isNaN(n) ? 0 : n;
+  if (/^\d+$/.test(trimmed)) {
+    const n = Number.parseInt(trimmed, 10);
+    return Number.isNaN(n) ? 0 : n;
+  }
+  const legacy = trimmed.match(/^(?:svc|service|news|price)-(\d+)$/i);
+  if (legacy) {
+    const n = Number.parseInt(legacy[1], 10);
+    return Number.isNaN(n) ? 0 : n;
+  }
+  return 0;
 };

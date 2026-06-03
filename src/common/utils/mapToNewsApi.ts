@@ -102,11 +102,13 @@ export const mapNewsHubToApi = (
   sections: existingHubSections,
   type: "NEWS",
   active: true,
+  parentId: null,
 });
 
+/** Bài viết con — parentId phải là id trang Hub (header) /tin-tuc trên CMS. */
 export const mapNewsChildCardToApi = (
   child: NewsListItem,
-  parentId: number,
+  hubPageId: number,
   existingSections: NewsSectionDto[] = [],
 ): NewsPageWritePayloadDto => ({
   name: child.name,
@@ -117,7 +119,7 @@ export const mapNewsChildCardToApi = (
   sortIndex: child.sortIndex,
   active: child.active ?? true,
   type: "NEWS",
-  parentId,
+  parentId: hubPageId,
   otherOptions: buildCardDateOptions(child.publishDate),
   sections: existingSections,
 });

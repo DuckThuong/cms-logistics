@@ -11,17 +11,19 @@ type NewsItemCardModalProps = {
   mode: NewsItemModalMode;
   initialValues: NewsListItem | null;
   nextSortIndex: number;
+  confirmLoading?: boolean;
   onClose: () => void;
-  onSave: (item: NewsListItem, mode: NewsItemModalMode) => void;
+  onSave: (item: NewsListItem, mode: NewsItemModalMode) => void | Promise<void>;
 };
 
-const newId = () => `news-${Math.random().toString(36).slice(2, 10)}`;
+const newId = () => `news-local-${crypto.randomUUID()}`;
 
 export const NewsItemCardModal = ({
   open,
   mode,
   initialValues,
   nextSortIndex,
+  confirmLoading = false,
   onClose,
   onSave,
 }: NewsItemCardModalProps) => {
@@ -51,20 +53,24 @@ export const NewsItemCardModal = ({
 
   const handleSubmit = async () => {
     const fields = await form.validateFields();
-    onSave(
-      {
-        id: fields.id.trim(),
-        name: fields.name.trim(),
-        shortDescription: fields.shortDescription.trim(),
-        image: fields.image?.trim() ?? "",
-        url: fields.url.trim() || slugify(fields.shortDescription || fields.name),
-        publishDate: fields.publishDate?.trim() ?? "",
-        sortIndex: fields.sortIndex,
-        active: fields.active ?? true,
-      },
-      mode,
-    );
-    onClose();
+    try {
+      await onSave(
+        {
+          id: fields.id.trim(),
+          name: fields.name.trim(),
+          shortDescription: fields.shortDescription.trim(),
+          image: fields.image?.trim() ?? "",
+          url: fields.url.trim() || slugify(fields.shortDescription || fields.name),
+          publishDate: fields.publishDate?.trim() ?? "",
+          sortIndex: fields.sortIndex,
+          active: fields.active ?? true,
+        },
+        mode,
+      );
+      onClose();
+    } catch {
+      // Giữ modal mở khi lưu API thất bại
+    }
   };
 
   return (
@@ -73,6 +79,7 @@ export const NewsItemCardModal = ({
       open={open}
       onCancel={onClose}
       onOk={handleSubmit}
+      confirmLoading={confirmLoading}
       okText="Lưu"
       cancelText="Huỷ"
       destroyOnClose

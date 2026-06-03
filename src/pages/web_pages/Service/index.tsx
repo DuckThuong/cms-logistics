@@ -1,10 +1,15 @@
 import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, Space } from "antd";
 import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getServiceContent } from "@/api/config/common.config";
+import { createPage, getServiceContent } from "@/api/config/common.config";
+import type {
+  ServiceChildDto,
+  ServiceFeaturedDto,
+  ServiceResponseDto,
+} from "@/api/dtos/service.response";
 import { CONTENT_ENDPOINTS } from "@/api/endpoints/common.endpoint";
 import {
   DEFAULT_MESSAGE,
@@ -13,7 +18,12 @@ import {
 } from "@/common/constants/constants";
 import { EMPTY_SERVICE_HUB_CONTENT } from "./emptyServiceHubContent";
 import { mapResponseToServiceHub } from "@/common/utils/mapFromServiceResponse";
+import {
+  mapServiceChildCardToApi,
+  mapSavedChildToListItem,
+} from "@/common/utils/mapToServiceApi";
 import { saveServiceHubToApi } from "@/common/utils/saveServiceHub";
+import { parseNumericId } from "@/common/utils/parseNumericId";
 import { normalizeSeoUrl } from "@/common/utils/seoUrl";
 import { useLoading } from "@/providers/loadingProvider";
 import { useNotification } from "@/providers/notificationProvider";
@@ -38,6 +48,7 @@ type SaveServiceHubVariables = {
 
 export const ServiceListPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { setLoading } = useLoading();
   const { showNotification } = useNotification();
   const [content, setContent] = useState<ServiceHubContent>(EMPTY_SERVICE_HUB_CONTENT);
@@ -46,6 +57,7 @@ export const ServiceListPage = () => {
   const [cardModalOpen, setCardModalOpen] = useState(false);
   const [cardModalMode, setCardModalMode] = useState<ServiceItemModalMode>("create");
   const [editingItem, setEditingItem] = useState<ServiceListItem | null>(null);
+  const [cardSaving, setCardSaving] = useState(false);
 
   const { data: servicePage, isLoading } = useQuery({
     queryKey: [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
@@ -65,6 +77,12 @@ export const ServiceListPage = () => {
     },
   });
 
+  /** Id trang Hub (header /dich-vu) — dùng làm parentId khi tạo dịch vụ con. */
+  const hubPageId = useMemo(
+    () => servicePage?.id ?? pageId ?? null,
+    [servicePage?.id, pageId],
+  );
+
   useEffect(() => {
     if (!servicePage) {
       return;
@@ -83,6 +101,10 @@ export const ServiceListPage = () => {
     onSuccess: ({ content: saved, pageId: nextPageId }, variables) => {
       setPageId(nextPageId);
       setContent(saved);
+      queryClient.setQueryData<ServiceResponseDto>(
+        [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
+        (old) => (old ? { ...old, id: nextPageId } : old),
+      );
       const wasUpdate = variables.pageId != null;
       showNotification(
         wasUpdate
@@ -144,20 +166,108 @@ export const ServiceListPage = () => {
     setCardModalOpen(true);
   };
 
-  const handleCardSave = (item: ServiceListItem, mode: ServiceItemModalMode) => {
-    if (mode === "create") {
-      updateField(
-        "children",
-        [...content.children, item].sort((a, b) => a.sortIndex - b.sortIndex),
-      );
+  const mergeChildIntoList = (item: ServiceListItem, mode: ServiceItemModalMode) => {
+    setContent((prev) => {
+      const children =
+        mode === "create"
+          ? [...prev.children, item]
+          : prev.children.map((child) => (child.id === item.id ? item : child));
+      return {
+        ...prev,
+        children: children.sort((a, b) => a.sortIndex - b.sortIndex),
+      };
+    });
+  };
+
+  const toHubFeaturedChild = (saved: ServiceChildDto): ServiceFeaturedDto => ({
+    id: saved.id,
+    name: saved.name,
+    url: saved.url,
+    shortDescription: saved.shortDescription,
+    image: saved.image ?? "",
+    content: saved.content,
+    description: [],
+    otherOptions: [],
+    sortIndex: saved.sortIndex,
+    active: saved.active,
+    type: saved.type,
+    parentId: saved.parentId ?? 0,
+  });
+
+  const patchHubQueryChild = (saved: ServiceChildDto) => {
+    const featured = toHubFeaturedChild(saved);
+    queryClient.setQueryData<ServiceResponseDto>(
+      [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
+      (old) => {
+        if (!old) {
+          return old;
+        }
+        const children = [...(old.children ?? [])];
+        const index = children.findIndex((c) => c.id === featured.id);
+        if (index >= 0) {
+          children[index] = featured;
+        } else {
+          children.push(featured);
+        }
+        return { ...old, children };
+      },
+    );
+  };
+
+  const ensureHubPageId = async (): Promise<number> => {
+    if (hubPageId != null && hubPageId > 0) {
+      return hubPageId;
+    }
+    const { pageId: newHubPageId, content: savedHub } = await saveServiceHubToApi(
+      { ...content, children: [] },
+      null,
+    );
+    setPageId(newHubPageId);
+    setContent((prev) => ({ ...savedHub, children: prev.children }));
+    queryClient.setQueryData<ServiceResponseDto>(
+      [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
+      (old) => (old ? { ...old, id: newHubPageId } : old),
+    );
+    showNotification(
+      `Đã tạo header Hub (ID: ${newHubPageId}). Đang tạo dịch vụ...`,
+      NOTI_SUCCESS,
+    );
+    return newHubPageId;
+  };
+
+  const handleCardSave = async (item: ServiceListItem, mode: ServiceItemModalMode) => {
+    if (mode === "create" && parseNumericId(item.id) <= 0) {
+      setCardSaving(true);
+      try {
+        const parentHubId = await ensureHubPageId();
+        const payload = mapServiceChildCardToApi(item, parentHubId, []);
+        const saved = await createPage<ServiceChildDto>(payload);
+        const savedItem = mapSavedChildToListItem(saved);
+        mergeChildIntoList(savedItem, "create");
+        patchHubQueryChild(saved);
+        showNotification(
+          `Đã tạo dịch vụ (ID: ${saved.id}, parentId: ${parentHubId}).`,
+          NOTI_SUCCESS,
+        );
+      } catch (error) {
+        let message = DEFAULT_MESSAGE;
+        if (isAxiosError(error)) {
+          const apiMessage = error.response?.data?.message;
+          if (typeof apiMessage === "string") {
+            message = apiMessage;
+          } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+            message = apiMessage[0];
+          }
+        }
+        showNotification(message, NOTI_ERROR);
+        throw error;
+      } finally {
+        setCardSaving(false);
+      }
       return;
     }
-    updateField(
-      "children",
-      content.children
-        .map((child) => (child.id === item.id ? item : child))
-        .sort((a, b) => a.sortIndex - b.sortIndex),
-    );
+
+    mergeChildIntoList(item, mode);
   };
 
   const hubConfigPanel = (
@@ -263,6 +373,7 @@ export const ServiceListPage = () => {
         mode={cardModalMode}
         initialValues={editingItem}
         nextSortIndex={content.children.length + 1}
+        confirmLoading={cardSaving}
         onClose={() => setCardModalOpen(false)}
         onSave={handleCardSave}
       />

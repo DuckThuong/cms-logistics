@@ -1,10 +1,11 @@
 import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, Space } from "antd";
 import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getNewsContent } from "@/api/config/common.config";
+import { createPage, getNewsContent } from "@/api/config/common.config";
+import type { NewsChildDto, NewsContentDto } from "@/api/dtos/news.response";
 import { CONTENT_ENDPOINTS } from "@/api/endpoints/common.endpoint";
 import {
   DEFAULT_MESSAGE,
@@ -12,7 +13,9 @@ import {
   NOTI_SUCCESS,
 } from "@/common/constants/constants";
 import { mapResponseToNewsHub } from "@/common/utils/mapFromNewsResponse";
+import { mapNewsChildCardToApi, mapSavedChildToNewsListItem } from "@/common/utils/mapToNewsApi";
 import { saveNewsHubToApi } from "@/common/utils/saveNewsHub";
+import { parseNumericId } from "@/common/utils/parseNumericId";
 import { normalizeSeoUrl } from "@/common/utils/seoUrl";
 import { useLoading } from "@/providers/loadingProvider";
 import { useNotification } from "@/providers/notificationProvider";
@@ -37,6 +40,7 @@ type SaveNewsHubVariables = {
 
 export const NewsListPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { setLoading } = useLoading();
   const { showNotification } = useNotification();
   const [content, setContent] = useState<NewsHubContent>(EMPTY_NEWS_HUB_CONTENT);
@@ -45,6 +49,7 @@ export const NewsListPage = () => {
   const [cardModalOpen, setCardModalOpen] = useState(false);
   const [cardModalMode, setCardModalMode] = useState<NewsItemModalMode>("create");
   const [editingItem, setEditingItem] = useState<NewsListItem | null>(null);
+  const [cardSaving, setCardSaving] = useState(false);
 
   const { data: newsPage, isLoading } = useQuery({
     queryKey: [CONTENT_ENDPOINTS.GET_NEWS_CONTENT],
@@ -64,6 +69,12 @@ export const NewsListPage = () => {
     },
   });
 
+  /** Id trang Hub (header /tin-tuc) — dùng làm parentId khi tạo bài viết con. */
+  const hubPageId = useMemo(
+    () => newsPage?.id ?? pageId ?? null,
+    [newsPage?.id, pageId],
+  );
+
   useEffect(() => {
     if (!newsPage) {
       return;
@@ -82,6 +93,10 @@ export const NewsListPage = () => {
     onSuccess: ({ content: saved, pageId: nextPageId }, variables) => {
       setPageId(nextPageId);
       setContent(saved);
+      queryClient.setQueryData<NewsContentDto>(
+        [CONTENT_ENDPOINTS.GET_NEWS_CONTENT],
+        (old) => (old ? { ...old, id: nextPageId } : old),
+      );
       const wasUpdate = variables.pageId != null;
       showNotification(
         wasUpdate
@@ -143,20 +158,92 @@ export const NewsListPage = () => {
     setCardModalOpen(true);
   };
 
-  const handleCardSave = (item: NewsListItem, mode: NewsItemModalMode) => {
-    if (mode === "create") {
-      updateField(
-        "children",
-        [...content.children, item].sort((a, b) => a.sortIndex - b.sortIndex),
-      );
+  const mergeChildIntoList = (item: NewsListItem, mode: NewsItemModalMode) => {
+    setContent((prev) => {
+      const children =
+        mode === "create"
+          ? [...prev.children, item]
+          : prev.children.map((child) => (child.id === item.id ? item : child));
+      return {
+        ...prev,
+        children: children.sort((a, b) => a.sortIndex - b.sortIndex),
+      };
+    });
+  };
+
+  const patchHubQueryChild = (saved: NewsChildDto) => {
+    queryClient.setQueryData<NewsContentDto>(
+      [CONTENT_ENDPOINTS.GET_NEWS_CONTENT],
+      (old) => {
+        if (!old) {
+          return old;
+        }
+        const children = [...(old.children ?? [])];
+        const index = children.findIndex((c) => c.id === saved.id);
+        if (index >= 0) {
+          children[index] = saved;
+        } else {
+          children.push(saved);
+        }
+        return { ...old, children };
+      },
+    );
+  };
+
+  const ensureHubPageId = async (): Promise<number> => {
+    if (hubPageId != null && hubPageId > 0) {
+      return hubPageId;
+    }
+    const { pageId: newHubPageId, content: savedHub } = await saveNewsHubToApi(
+      { ...content, children: [] },
+      null,
+    );
+    setPageId(newHubPageId);
+    setContent((prev) => ({ ...savedHub, children: prev.children }));
+    queryClient.setQueryData<NewsContentDto>(
+      [CONTENT_ENDPOINTS.GET_NEWS_CONTENT],
+      (old) => (old ? { ...old, id: newHubPageId } : old),
+    );
+    showNotification(
+      `Đã tạo header Hub (ID: ${newHubPageId}). Đang tạo bài viết...`,
+      NOTI_SUCCESS,
+    );
+    return newHubPageId;
+  };
+
+  const handleCardSave = async (item: NewsListItem, mode: NewsItemModalMode) => {
+    if (mode === "create" && parseNumericId(item.id) <= 0) {
+      setCardSaving(true);
+      try {
+        const parentHubId = await ensureHubPageId();
+        const payload = mapNewsChildCardToApi(item, parentHubId, []);
+        const saved = await createPage<NewsChildDto>(payload);
+        const savedItem = mapSavedChildToNewsListItem(saved);
+        mergeChildIntoList(savedItem, "create");
+        patchHubQueryChild(saved);
+        showNotification(
+          `Đã tạo bài viết (ID: ${saved.id}, parentId: ${parentHubId}).`,
+          NOTI_SUCCESS,
+        );
+      } catch (error) {
+        let message = DEFAULT_MESSAGE;
+        if (isAxiosError(error)) {
+          const apiMessage = error.response?.data?.message;
+          if (typeof apiMessage === "string") {
+            message = apiMessage;
+          } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+            message = apiMessage[0];
+          }
+        }
+        showNotification(message, NOTI_ERROR);
+        throw error;
+      } finally {
+        setCardSaving(false);
+      }
       return;
     }
-    updateField(
-      "children",
-      content.children
-        .map((child) => (child.id === item.id ? item : child))
-        .sort((a, b) => a.sortIndex - b.sortIndex),
-    );
+
+    mergeChildIntoList(item, mode);
   };
 
   const hubConfigPanel = (
@@ -245,6 +332,7 @@ export const NewsListPage = () => {
         mode={cardModalMode}
         initialValues={editingItem}
         nextSortIndex={content.children.length + 1}
+        confirmLoading={cardSaving}
         onClose={() => setCardModalOpen(false)}
         onSave={handleCardSave}
       />
