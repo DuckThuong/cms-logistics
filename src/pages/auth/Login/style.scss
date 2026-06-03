@@ -41,8 +41,34 @@ $text-dark: #1a1a1a;
 
   &__logo {
     height: 44px;
+    width: auto;
+    max-width: 160px;
     object-fit: contain;
-    filter: brightness(0) invert(1);
+    background: #fff;
+    border-radius: 6px;
+    padding: 4px 8px;
+  }
+
+  &__brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    gap: 2px;
+  }
+
+  &__brand-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  &__brand-sub {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   &__rate {

@@ -77,36 +77,36 @@ $transition-base: all 0.25s ease;
   gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
+  min-width: 0;
   transition: $transition-fast;
 
-  &:hover .hk-header__logo-icon {
-    box-shadow: 0 0 18px $lo-glow;
-    transform: scale(1.04);
+  &:hover .hk-header__logo-img {
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 12px $lo-glow);
   }
 }
 
-.hk-header__logo-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: $radius-sm;
-  background: linear-gradient(135deg, $lo 0%, $lo-light 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+.hk-header__logo-img {
+  height: 40px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  display: block;
   flex-shrink: 0;
   transition: $transition-base;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
 }
 
 .hk-header__logo-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  justify-content: center;
+  line-height: 1.15;
+  gap: 1px;
+  min-width: 0;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
 }
 
 .hk-header__logo-name {
@@ -114,14 +114,16 @@ $transition-base: all 0.25s ease;
   font-weight: 700;
   color: $text-white;
   letter-spacing: -0.3px;
+  white-space: nowrap;
 }
 
 .hk-header__logo-sub {
   font-size: 10px;
   color: $text-muted;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────

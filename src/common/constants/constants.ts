@@ -1,5 +1,13 @@
 import { ROUTER_PATH } from "@/routers/Route";
 
+export const BRAND = {
+  name: "Mã Vận Logistics",
+  namePrimary: "Mã Vận",
+  nameSecondary: "Logistics",
+  cmsSubtitle: "Admin Dashboard",
+  logoSrc: `${process.env.PUBLIC_URL}/image.png`,
+} as const;
+
 export const NOTI_ERROR = "error";
 export const NOTI_SUCCESS = "success";
 export const DEFAULT_MESSAGE = "Đã xảy ra lỗi.";

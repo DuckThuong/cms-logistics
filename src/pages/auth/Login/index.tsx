@@ -1,4 +1,5 @@
 import { Logo } from "@/components/Logo";
+import { BRAND } from "@/common/constants/constants";
 import { ROUTER_PATH } from "@/routers/Route";
 import { LockOutlined, LoginOutlined, PhoneOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Divider, Form, Input } from "antd";
@@ -24,13 +25,14 @@ export default function LoginPage() {
         <div className="login-header__left">
           <a href={ROUTER_PATH.DASHBOARD} title="Trang chủ">
             <img
-              src="https://hongkylogistics.vn/img/logo/logohk.png"
-              alt="Công Ty Logistics"
+              src={BRAND.logoSrc}
+              alt={BRAND.name}
               className="login-header__logo"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
             />
+            <div className="login-header__brand-text">
+              <span className="login-header__brand-name">{BRAND.namePrimary}</span>
+              <span className="login-header__brand-sub">{BRAND.cmsSubtitle}</span>
+            </div>
           </a>
         </div>
       </header>
