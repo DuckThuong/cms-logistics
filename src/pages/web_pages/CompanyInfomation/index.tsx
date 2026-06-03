@@ -356,12 +356,12 @@ export const CompanyInformationPage = () => {
           values={highlightOptions}
           onChange={handleHighlightChange}
         />
-
+        {/* 
         <QuickLinksAutoPanel
           title="Quick Links"
           values={quickLinkOptions}
           onIconChange={handleQuickLinkIconChange}
-        />
+        /> */}
 
         <PolicySectionsEditor
           title="Khối Chính sách (Policy)"
