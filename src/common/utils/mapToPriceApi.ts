@@ -1,25 +1,41 @@
 import type {
+  OtherOptionDto,
   SectionDescriptionDto,
-  ServiceByIdResponseDto,
+  SectionDto,
+  ServiceChildDto,
 } from "@/api/dtos/priceResponse.dto";
 import type {
   PriceDetailContent,
   PriceDetailSection,
+  PriceHubContent,
   PriceListItem,
   PriceOtherOption,
   PriceSectionDescription,
 } from "@/common/types/price";
+import { mapChildDtoToPriceListItem } from "@/common/utils/mapFromPriceResponse";
+import { buildSectionTitle } from "@/common/utils/sectionTitle";
 
-const parseNumericId = (id: string): number => {
-  const digits = id.replace(/\D/g, "");
-  if (!digits) {
-    return 0;
-  }
-  const n = Number.parseInt(digits, 10);
-  return Number.isNaN(n) ? 0 : n;
-};
+export type PriceSectionPayloadDto = Omit<
+  SectionDto,
+  "id" | "pageId" | "pageTitle" | "createdAt" | "updatedAt"
+>;
 
-export const mapOtherOptionToApi = (opt: PriceOtherOption) => ({
+export interface PricePageWritePayloadDto {
+  name: string;
+  url: string;
+  shortDescription: string;
+  content: string;
+  description?: string[];
+  otherOptions?: OtherOptionDto[];
+  sections?: PriceSectionPayloadDto[] | SectionDto[];
+  type?: string;
+  parentId?: number | null;
+  image?: string | null;
+  active?: boolean;
+  sortIndex?: number;
+}
+
+export const mapOtherOptionToApi = (opt: PriceOtherOption): OtherOptionDto => ({
   icon: opt.icon ?? "",
   image: opt.image ?? "",
   type: opt.type ?? "info",
@@ -50,53 +66,84 @@ export const mapSectionDescriptionToApi = (
   };
 };
 
-export const mapSectionToApi = (
-  section: PriceDetailSection,
-  page: PriceDetailContent,
-): ServiceByIdResponseDto["sections"][number] => {
-  const timestamp = page.updatedAt || new Date().toISOString();
-  return {
-    id: parseNumericId(section.id),
-    pageId: parseNumericId(page.id),
-    pageTitle: page.shortDescription || page.name,
-    title: section.title,
-    description: (section.description ?? []).map(mapSectionDescriptionToApi),
-    images: [],
-    sortIndex: section.sortIndex,
-    active: section.active,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  };
-};
+const mapSectionToWritePayload = (section: PriceDetailSection): PriceSectionPayloadDto => ({
+  title: section.title ? buildSectionTitle(section.title) : "",
+  description: (section.description ?? []).map(mapSectionDescriptionToApi),
+  images: [],
+  sortIndex: section.sortIndex,
+  active: section.active ?? true,
+});
 
 export type MapPriceDetailOptions = {
   listItem?: PriceListItem;
+  parentId?: number | null;
 };
 
-/** Chuyển nội dung CMS → payload khớp `ServiceByIdResponseDto`. */
+/** Hub /bang-gia — giữ sections hub từ API nếu có. */
+export const mapPriceHubToApi = (
+  hub: PriceHubContent,
+  existingHubSections: SectionDto[] = [],
+): PricePageWritePayloadDto => ({
+  name: hub.name,
+  url: hub.seoUrl,
+  shortDescription: hub.shortDescription,
+  content: hub.content,
+  description: [],
+  otherOptions: [],
+  sections: existingHubSections,
+  type: "PRICE",
+  active: true,
+});
+
+export type PriceChildExistingPayload = {
+  sections?: SectionDto[];
+  otherOptions?: OtherOptionDto[];
+  description?: string[];
+  content?: string;
+};
+
+/** Thẻ bảng giá (children) — giữ nội dung chi tiết khi chỉ sửa metadata hub. */
+export const mapPriceChildCardToApi = (
+  child: PriceListItem,
+  parentId: number,
+  existing: PriceChildExistingPayload = {},
+): PricePageWritePayloadDto => ({
+  name: child.name,
+  url: child.url,
+  shortDescription: child.shortDescription,
+  content: existing.content ?? (child.shortDescription || child.name),
+  description: existing.description ?? [],
+  otherOptions: existing.otherOptions ?? [],
+  sections: existing.sections ?? [],
+  sortIndex: child.sortIndex,
+  active: child.active ?? true,
+  type: "PRICE",
+  parentId,
+  image: null,
+});
+
+/** Trang chi tiết bảng giá — gửi đầy đủ sections, banner, intro. */
 export const mapPriceDetailToApi = (
   detail: PriceDetailContent,
   options: MapPriceDetailOptions = {},
-): ServiceByIdResponseDto => {
-  const { listItem } = options;
-  const updatedAt = detail.updatedAt || new Date().toISOString();
+): PricePageWritePayloadDto => {
+  const { listItem, parentId = null } = options;
 
   return {
-    id: parseNumericId(detail.id),
     name: detail.name,
     url: detail.url,
     shortDescription: detail.shortDescription,
-    image: null,
-    description: detail.description ?? [],
     content: detail.content ?? listItem?.name ?? detail.name,
+    description: detail.description ?? [],
     otherOptions: (detail.otherOptions ?? []).map(mapOtherOptionToApi),
     sortIndex: listItem?.sortIndex ?? 1,
     active: listItem?.active ?? true,
     type: "PRICE",
-    parentId: null,
-    children: null,
-    sections: (detail.sections ?? []).map((section) => mapSectionToApi(section, detail)),
-    createdAt: updatedAt,
-    updatedAt,
+    parentId,
+    image: null,
+    sections: (detail.sections ?? []).map(mapSectionToWritePayload),
   };
 };
+
+export const mapSavedChildToPriceListItem = (saved: ServiceChildDto): PriceListItem =>
+  mapChildDtoToPriceListItem(saved);

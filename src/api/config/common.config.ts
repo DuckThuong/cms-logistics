@@ -3,17 +3,22 @@ import type {
   AboutPagePayloadDto,
   AboutResponseDto,
 } from "../dtos/about.response";
+import type { ServiceChildDto as PriceChildDto } from "../dtos/priceResponse.dto";
 import type {
   ServiceChildDto,
   ServicePageWritePayloadDto,
   ServiceResponseDto,
 } from "../dtos/service.response";
+import type { PricePageWritePayloadDto } from "@/common/utils/mapToPriceApi";
 import {
   COMMON_ENDPOINT,
   CONTENT_ENDPOINTS,
 } from "../endpoints/common.endpoint";
 
-export type PageWritePayloadDto = AboutPagePayloadDto | ServicePageWritePayloadDto;
+export type PageWritePayloadDto =
+  | AboutPagePayloadDto
+  | ServicePageWritePayloadDto
+  | PricePageWritePayloadDto;
 
 /** Wrapper cho ApiResponse<T> của Spring Boot */
 interface ApiResponse<T> {
@@ -55,6 +60,26 @@ export const getServiceContent = async (): Promise<ServiceResponseDto> => {
 export const getServiceById = async (id: number): Promise<ServiceChildDto> => {
   const endpoint = CONTENT_ENDPOINTS.GET_SERVICE_BY_ID.replace("{id}", String(id));
   const res = await axiosClient.get<ApiResponse<ServiceChildDto>>(endpoint);
+  return res.data.data;
+};
+
+/** Lấy nội dung hub bảng giá — cùng contract pages hub (url=price). */
+export const getPriceContent = async (): Promise<ServiceResponseDto> => {
+  const res = await axiosClient.get<ApiResponse<ServiceResponseDto>>(
+    COMMON_ENDPOINT,
+    {
+      params: {
+        url: CONTENT_ENDPOINTS.GET_PRICE_CONTENT,
+      },
+    },
+  );
+  return res.data.data;
+};
+
+/** Lấy trang bảng giá con theo id (chi tiết). */
+export const getPriceById = async (id: number): Promise<PriceChildDto> => {
+  const endpoint = CONTENT_ENDPOINTS.GET_PRICE_BY_ID.replace("{id}", String(id));
+  const res = await axiosClient.get<ApiResponse<PriceChildDto>>(endpoint);
   return res.data.data;
 };
 

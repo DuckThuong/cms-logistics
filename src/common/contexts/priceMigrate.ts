@@ -94,7 +94,7 @@ export const migratePriceHub = (data: PriceHubContent): PriceHubContent => ({
 });
 
 export const migratePriceDetail = (data: PriceDetailContent): PriceDetailContent => {
-  const url = data.url?.trim() || slugify(data.shortDescription || data.name || data.id);
+  const url = data.url?.trim() || "price";
   return {
     id: data.id?.trim() || newId("price"),
     name: data.name ?? "",
