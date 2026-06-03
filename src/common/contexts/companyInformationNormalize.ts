@@ -1,5 +1,9 @@
 import type { AboutIntro, AboutSection, CompanyInformationContent } from "@/common/types/companyInformation";
-import { syncOtherOptions } from "@/common/utils/companyInformationOtherOptions";
+import {
+  attachQuickLinkSettings,
+  parseQuickLinkSettings,
+  syncOtherOptions,
+} from "@/common/utils/companyInformationOtherOptions";
 import {
   DEFAULT_DESCRIPTION_TYPE,
   reindexSections,
@@ -42,12 +46,27 @@ export const normalizeCompanyInformationContent = (
 ): CompanyInformationContent => {
   const intro = normalizeIntro(raw.intro);
   const sections = reindexSections((raw.sections ?? []).map(normalizeSection));
+  const settings = parseQuickLinkSettings(raw.otherOptions ?? []);
+  const showQuickLinks = raw.showQuickLinks ?? settings.enabled;
+  const hiddenQuickLinkIds = raw.hiddenQuickLinkIds ?? settings.hiddenIds;
+  const synced = syncOtherOptions({
+    intro,
+    sections,
+    otherOptions: raw.otherOptions ?? [],
+    showQuickLinks,
+    hiddenQuickLinkIds,
+  });
 
   return {
     ...raw,
     seoUrl: normalizeSeoUrl(raw.seoUrl),
     intro,
     sections,
-    otherOptions: syncOtherOptions({ intro, sections, otherOptions: raw.otherOptions ?? [] }),
+    showQuickLinks,
+    hiddenQuickLinkIds,
+    otherOptions: attachQuickLinkSettings(synced, {
+      enabled: showQuickLinks,
+      hiddenIds: hiddenQuickLinkIds,
+    }),
   };
 };

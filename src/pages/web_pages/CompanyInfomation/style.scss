@@ -212,26 +212,44 @@ $transition-base: all 0.25s ease;
 
   &__quick-links-item {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
     border-radius: 8px;
     background: $group-bg;
     border: 1px solid $group-border;
+
+    > .company-information-page__icon-field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    > .ant-btn {
+      flex-shrink: 0;
+    }
+  }
+
+  &__quick-links-item--hidden {
+    justify-content: space-between;
   }
 
   &__quick-links-main {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+    max-width: 36%;
+    min-width: 120px;
   }
 
   &__quick-links-label {
     font-size: 13px;
     font-weight: 500;
     color: $page-text-title;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__quick-links-anchor {
@@ -244,23 +262,10 @@ $transition-base: all 0.25s ease;
     flex-shrink: 0;
   }
 
-  &__quick-links-icon-edit {
-    width: 100%;
-  }
-
-  &__quick-links-icon-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    color: $page-text-body;
-  }
-
   &__icon-field {
     display: flex;
     align-items: center;
     gap: 10px;
-    width: 100%;
 
     .ant-input {
       flex: 1;

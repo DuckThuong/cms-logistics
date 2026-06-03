@@ -53,7 +53,10 @@ export const CompanyInformationClientPreview = ({
 }: CompanyInformationClientPreviewProps) => {
   const introAnchorId = toDomAnchorId(content.intro.anchor, "gioi-thieu");
   const highlights = getHighlightOptions(content.otherOptions);
-  const quickLinks = getQuickLinkOptions(content.otherOptions);
+  const quickLinks =
+    content.showQuickLinks !== false
+      ? getQuickLinkOptions(content.otherOptions)
+      : [];
   const policySections = filterSectionsByKind(content.sections, "policy");
   const contentSections = filterSectionsByKind(content.sections, "content");
   const [closingLineOne, closingLineTwo] = getClosingLines(content.sections);

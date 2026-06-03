@@ -5,6 +5,7 @@ import {
   type AboutSection,
   type AboutSectionKind,
 } from "@/common/types/companyInformation";
+import { parseQuickLinkSettings } from "@/common/utils/companyInformationOtherOptions";
 import { INTRO_API_SORT_INDEX } from "@/common/utils/companyInformationSection";
 
 /**
@@ -111,8 +112,10 @@ export const mapResponseToCompanyInformation = (
     return section ? section.id : fallbackId;
   };
 
+  const rawOtherOptions = response.otherOptions ?? [];
+
   // Map otherOptions — quick-link id khớp intro/section để merge icon đúng
-  const otherOptions = (response.otherOptions ?? []).map((opt, idx) => {
+  const otherOptions = rawOtherOptions.map((opt, idx) => {
     const value = opt.value ?? "";
     const type = (opt.type as CompanyInformationContent["otherOptions"][number]["type"]) ?? ABOUT_OPTION_TYPES.highlight;
     const fallbackId = `opt-${idx}`;
@@ -129,6 +132,8 @@ export const mapResponseToCompanyInformation = (
     };
   });
 
+  const quickLinkSettings = parseQuickLinkSettings(otherOptions);
+
   return {
     seoUrl: response.url ?? "about",
     pageTag: response.shortDescription ?? "",
@@ -138,5 +143,7 @@ export const mapResponseToCompanyInformation = (
     intro,
     otherOptions,
     sections: mappedSections,
+    showQuickLinks: quickLinkSettings.enabled,
+    hiddenQuickLinkIds: quickLinkSettings.hiddenIds,
   };
 };

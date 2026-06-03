@@ -13,6 +13,7 @@ import { normalizeCompanyInformationContent } from "@/common/contexts/companyInf
 import type { CompanyInformationContent } from "@/common/types/companyInformation";
 import { anchorFromTitle } from "@/common/utils/anchor";
 import {
+  deriveQuickLinkOptions,
   getHighlightOptions,
   getQuickLinkOptions,
   replaceHighlightOptions,
@@ -195,8 +196,21 @@ export const CompanyInformationPage = () => {
         intro: content.intro,
         sections: content.sections,
         otherOptions: content.otherOptions,
+        showQuickLinks: content.showQuickLinks,
+        hiddenQuickLinkIds: content.hiddenQuickLinkIds,
       }),
-    [content.intro, content.sections, content.otherOptions],
+    [
+      content.intro,
+      content.sections,
+      content.otherOptions,
+      content.showQuickLinks,
+      content.hiddenQuickLinkIds,
+    ],
+  );
+
+  const derivedQuickLinks = useMemo(
+    () => deriveQuickLinkOptions({ intro: content.intro, sections: content.sections }),
+    [content.intro, content.sections],
   );
 
   const highlightOptions = useMemo(
@@ -211,26 +225,30 @@ export const CompanyInformationPage = () => {
 
   const quickLinksForPanel = useMemo(
     () =>
-      quickLinkOptions.map((link) => ({
+      derivedQuickLinks.map((link) => ({
         ...link,
-        icon: quickLinkIconDrafts[link.id] ?? link.icon ?? "",
+        icon:
+          quickLinkIconDrafts[link.id] ??
+          quickLinkOptions.find((opt) => opt.id === link.id)?.icon ??
+          "",
       })),
-    [quickLinkOptions, quickLinkIconDrafts],
+    [derivedQuickLinks, quickLinkOptions, quickLinkIconDrafts],
   );
 
   useEffect(() => {
     setQuickLinkIconDrafts((prev) => {
       let changed = false;
       const next = { ...prev };
-      for (const link of quickLinkOptions) {
+      for (const link of derivedQuickLinks) {
         if (!(link.id in next)) {
-          next[link.id] = link.icon ?? "";
+          const savedIcon = quickLinkOptions.find((opt) => opt.id === link.id)?.icon ?? "";
+          next[link.id] = savedIcon;
           changed = true;
         }
       }
       return changed ? next : prev;
     });
-  }, [quickLinkOptions]);
+  }, [derivedQuickLinks, quickLinkOptions]);
 
   const contentForPreview = useMemo(
     () =>
@@ -267,10 +285,30 @@ export const CompanyInformationPage = () => {
           intro: content.intro,
           sections: content.sections,
           otherOptions: content.otherOptions,
+          showQuickLinks: content.showQuickLinks,
+          hiddenQuickLinkIds: content.hiddenQuickLinkIds,
         }),
         highlights,
       ),
     );
+  };
+
+  const handleShowQuickLinksChange = (enabled: boolean) => {
+    updateField("showQuickLinks", enabled);
+  };
+
+  const handleRemoveQuickLink = (linkId: string) => {
+    setContent((prev) => ({
+      ...prev,
+      hiddenQuickLinkIds: [...new Set([...(prev.hiddenQuickLinkIds ?? []), linkId])],
+    }));
+  };
+
+  const handleRestoreQuickLink = (linkId: string) => {
+    setContent((prev) => ({
+      ...prev,
+      hiddenQuickLinkIds: (prev.hiddenQuickLinkIds ?? []).filter((id) => id !== linkId),
+    }));
   };
 
   const handleQuickLinkIconChange = (linkId: string, icon: string) => {
@@ -435,6 +473,11 @@ export const CompanyInformationPage = () => {
         <QuickLinksAutoPanel
           title="Quick Links"
           values={quickLinksForPanel}
+          showQuickLinks={content.showQuickLinks !== false}
+          hiddenLinkIds={content.hiddenQuickLinkIds ?? []}
+          onShowQuickLinksChange={handleShowQuickLinksChange}
+          onRemoveLink={handleRemoveQuickLink}
+          onRestoreLink={handleRestoreQuickLink}
           onIconChange={handleQuickLinkIconChange}
         />
 

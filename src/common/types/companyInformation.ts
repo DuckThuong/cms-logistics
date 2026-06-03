@@ -2,7 +2,16 @@
 export const ABOUT_OPTION_TYPES = {
   highlight: "options",
   quickLink: "quick-link",
+  /** Meta CMS — không hiển thị trên FE */
+  quickLinkSettings: "quick-link-settings",
 } as const;
+
+export const QUICK_LINK_SETTINGS_OPTION_ID = "quick-link-settings";
+
+export type QuickLinkSettingsPayload = {
+  enabled: boolean;
+  hiddenIds: string[];
+};
 
 export type AboutOptionType =
   (typeof ABOUT_OPTION_TYPES)[keyof typeof ABOUT_OPTION_TYPES];
@@ -58,4 +67,8 @@ export interface CompanyInformationContent {
   intro: AboutIntro;
   otherOptions: AboutOtherOption[];
   sections: AboutSection[];
+  /** Bật khối «Xem nhanh» trên preview / FE */
+  showQuickLinks?: boolean;
+  /** Id quick-link tự sinh đã ẩn (intro, section id, …) */
+  hiddenQuickLinkIds?: string[];
 }

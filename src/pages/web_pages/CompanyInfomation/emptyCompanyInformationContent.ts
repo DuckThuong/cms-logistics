@@ -15,4 +15,6 @@ export const EMPTY_COMPANY_INFORMATION_CONTENT: CompanyInformationContent = {
   },
   otherOptions: [],
   sections: [],
+  showQuickLinks: true,
+  hiddenQuickLinkIds: [],
 };

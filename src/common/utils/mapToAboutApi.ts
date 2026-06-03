@@ -1,5 +1,10 @@
 import type { AboutPagePayloadDto } from "@/api/dtos/about.response";
 import type { CompanyInformationContent } from "@/common/types/companyInformation";
+import {
+  attachQuickLinkSettings,
+  parseQuickLinkSettings,
+  syncOtherOptions,
+} from "@/common/utils/companyInformationOtherOptions";
 import { INTRO_API_SORT_INDEX } from "@/common/utils/companyInformationSection";
 
 /** JSON title khớp FE `retractTitle` */
@@ -21,6 +26,20 @@ export const mapCompanyInformationToAboutApi = (
     body: null as string | null,
   };
 
+  const settings = parseQuickLinkSettings(content.otherOptions);
+  const showQuickLinks = content.showQuickLinks ?? settings.enabled;
+  const hiddenQuickLinkIds = content.hiddenQuickLinkIds ?? settings.hiddenIds;
+  const otherOptionsForApi = attachQuickLinkSettings(
+    syncOtherOptions({
+      intro: content.intro,
+      sections: content.sections,
+      otherOptions: content.otherOptions,
+      showQuickLinks,
+      hiddenQuickLinkIds,
+    }),
+    { enabled: showQuickLinks, hiddenIds: hiddenQuickLinkIds },
+  );
+
   const bodySections = content.sections.map((section) => ({
     title: section.title ? buildAboutSectionTitle(section.title) : "",
     description: section.description ?? [],
@@ -37,7 +56,7 @@ export const mapCompanyInformationToAboutApi = (
     url: content.seoUrl,
     shortDescription: content.pageTag,
     content: content.pageSubtitle,
-    otherOptions: content.otherOptions.map((opt) => ({
+    otherOptions: otherOptionsForApi.map((opt) => ({
       icon: opt.icon ?? "",
       type: opt.type,
       value: opt.value ?? "",
