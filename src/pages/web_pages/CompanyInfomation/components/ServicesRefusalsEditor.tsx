@@ -11,12 +11,12 @@ type ServicesRefusalsEditorProps = {
   onChange: (sections: AboutSection[]) => void;
 };
 
-const newSectionId = () => `policy-${Math.random().toString(36).slice(2, 10)}`;
+const newSectionId = () => `content-${Math.random().toString(36).slice(2, 10)}`;
 
 const createEmptySection = (sortIndex: number): AboutSection => ({
   id: newSectionId(),
   sortIndex,
-  kind: "policy",
+  kind: "content",
   active: true,
   title: "",
   anchor: "",

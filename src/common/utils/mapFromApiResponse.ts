@@ -88,6 +88,7 @@ export const mapResponseToCompanyInformation = (
       description: (s.description ?? []).map((d) => ({
         icon: d.icon ?? "",
         text: d.text ?? "",
+        type: d.type ?? "text",
       })),
       images: s.images ?? [],
     };

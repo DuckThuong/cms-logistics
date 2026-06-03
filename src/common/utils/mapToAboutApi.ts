@@ -12,7 +12,7 @@ export const mapCompanyInformationToAboutApi = (
 ): AboutPagePayloadDto => {
   const introSection = {
     title: buildAboutSectionTitle(content.intro.title),
-    description: [{ icon: "", text: content.intro.content }],
+    description: [{ icon: "", text: content.intro.content, type: "text" }],
     images: content.intro.imageUrl?.trim() ? [content.intro.imageUrl.trim()] : [],
     sortIndex: INTRO_API_SORT_INDEX,
     active: true,

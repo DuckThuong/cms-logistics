@@ -25,6 +25,7 @@ export interface AboutIntro {
 export interface AboutSectionDescription {
   icon: string;
   text: string;
+  type: string;
 }
 
 export type AboutSectionKind = "policy" | "content" | "closing";

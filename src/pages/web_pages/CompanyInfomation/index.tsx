@@ -42,7 +42,7 @@ import { HighlightListEditor } from "./components/HighlightListEditor";
 import { ImageUploadField } from "./components/ImageUploadField";
 import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
-import { SectionsEditor } from "./components/SectionsEditor";
+import { PolicySectionsEditor } from "./components/PolicySectionsEditor";
 import { SeoSection } from "./components/SeoSection";
 import { EMPTY_COMPANY_INFORMATION_CONTENT } from "./emptyCompanyInformationContent";
 import "./style.scss";
@@ -363,7 +363,7 @@ export const CompanyInformationPage = () => {
           onIconChange={handleQuickLinkIconChange}
         />
 
-        <SectionsEditor
+        <PolicySectionsEditor
           title="Khối Chính sách (Policy)"
           values={policySections}
           onChange={updatePolicySections}
