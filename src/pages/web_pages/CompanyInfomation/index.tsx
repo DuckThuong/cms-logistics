@@ -16,8 +16,8 @@ import {
   getHighlightOptions,
   getQuickLinkOptions,
   replaceHighlightOptions,
+  patchQuickLinkIcon,
   syncOtherOptions,
-  updateQuickLinkIcon,
 } from "@/common/utils/companyInformationOtherOptions";
 import {
   filterSectionsByKind,
@@ -207,14 +207,24 @@ export const CompanyInformationPage = () => {
   };
 
   const handleHighlightChange = (highlights: typeof highlightOptions) => {
-    updateField("otherOptions", replaceHighlightOptions(content.otherOptions, highlights));
+    updateField(
+      "otherOptions",
+      replaceHighlightOptions(
+        syncOtherOptions({
+          intro: content.intro,
+          sections: content.sections,
+          otherOptions: content.otherOptions,
+        }),
+        highlights,
+      ),
+    );
   };
 
   const handleQuickLinkIconChange = (linkId: string, icon: string) => {
-    updateField(
-      "otherOptions",
-      updateQuickLinkIcon(syncOtherOptions(content), linkId, icon),
-    );
+    setContent((prev) => ({
+      ...prev,
+      otherOptions: patchQuickLinkIcon(prev.otherOptions, linkId, icon),
+    }));
   };
 
   const handleSave = () => {

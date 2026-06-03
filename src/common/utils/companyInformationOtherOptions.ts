@@ -62,15 +62,27 @@ export const deriveQuickLinkOptions = ({
   return links;
 };
 
+const buildQuickLinkIconById = (
+  derivedQuickLinks: AboutOtherOption[],
+  saved: AboutOtherOption[],
+): Map<string, string> => {
+  const iconById = new Map<string, string>();
+  for (const link of derivedQuickLinks) {
+    iconById.set(link.id, "");
+  }
+  for (const link of saved.filter(isQuickLinkOption)) {
+    iconById.set(link.id, link.icon ?? "");
+  }
+  return iconById;
+};
+
 /** Gắn icon đã lưu vào quick-link tự sinh; giữ nguyên highlights. */
 export const mergeOtherOptions = (
   highlights: AboutOtherOption[],
   derivedQuickLinks: AboutOtherOption[],
   saved: AboutOtherOption[],
 ): AboutOtherOption[] => {
-  const iconById = new Map(
-    [...saved, ...derivedQuickLinks].filter(isQuickLinkOption).map((link) => [link.id, link.icon ?? ""]),
-  );
+  const iconById = buildQuickLinkIconById(derivedQuickLinks, saved);
 
   const mergedQuickLinks = derivedQuickLinks.map((link) => ({
     ...link,
@@ -104,3 +116,32 @@ export const updateQuickLinkIcon = (
   options.map((opt) =>
     isQuickLinkOption(opt) && opt.id === linkId ? { ...opt, icon } : opt,
   );
+
+/** Cập nhật icon quick-link trong otherOptions thô (không ghi đè cả mảng đã sync). */
+export const patchQuickLinkIcon = (
+  otherOptions: AboutOtherOption[],
+  linkId: string,
+  icon: string,
+): AboutOtherOption[] => {
+  const existingIndex = otherOptions.findIndex(
+    (opt) => isQuickLinkOption(opt) && opt.id === linkId,
+  );
+  if (existingIndex >= 0) {
+    return otherOptions.map((opt, index) =>
+      index === existingIndex ? { ...opt, icon } : opt,
+    );
+  }
+
+  const highlights = getHighlightOptions(otherOptions);
+  const quickLinks = getQuickLinkOptions(otherOptions);
+  return [
+    ...highlights,
+    ...quickLinks,
+    {
+      id: linkId,
+      type: ABOUT_OPTION_TYPES.quickLink,
+      value: "",
+      icon,
+    },
+  ];
+};

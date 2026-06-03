@@ -1,5 +1,10 @@
 import type { AboutResponseDto } from "@/api/dtos/about.response";
-import type { CompanyInformationContent, AboutSection, AboutSectionKind } from "@/common/types/companyInformation";
+import {
+  ABOUT_OPTION_TYPES,
+  type CompanyInformationContent,
+  type AboutSection,
+  type AboutSectionKind,
+} from "@/common/types/companyInformation";
 import { INTRO_API_SORT_INDEX } from "@/common/utils/companyInformationSection";
 
 /**
@@ -94,13 +99,35 @@ export const mapResponseToCompanyInformation = (
     };
   });
 
-  // Map otherOptions
-  const otherOptions = (response.otherOptions ?? []).map((opt, idx) => ({
-    id: `opt-${idx}`,
-    icon: opt.icon ?? "",
-    type: (opt.type as any) ?? "options",
-    value: opt.value ?? "",
-  }));
+  const resolveQuickLinkId = (value: string, fallbackId: string): string => {
+    const label = value.trim();
+    if (!label) {
+      return fallbackId;
+    }
+    if (label === intro.title.trim()) {
+      return "intro";
+    }
+    const section = mappedSections.find((item) => item.title.trim() === label);
+    return section ? section.id : fallbackId;
+  };
+
+  // Map otherOptions — quick-link id khớp intro/section để merge icon đúng
+  const otherOptions = (response.otherOptions ?? []).map((opt, idx) => {
+    const value = opt.value ?? "";
+    const type = (opt.type as CompanyInformationContent["otherOptions"][number]["type"]) ?? ABOUT_OPTION_TYPES.highlight;
+    const fallbackId = `opt-${idx}`;
+    const id =
+      type === ABOUT_OPTION_TYPES.quickLink
+        ? resolveQuickLinkId(value, fallbackId)
+        : fallbackId;
+
+    return {
+      id,
+      icon: opt.icon ?? "",
+      type,
+      value,
+    };
+  });
 
   return {
     seoUrl: response.url ?? "about",

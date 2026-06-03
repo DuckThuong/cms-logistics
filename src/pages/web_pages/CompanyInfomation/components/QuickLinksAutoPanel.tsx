@@ -36,7 +36,7 @@ export const QuickLinksAutoPanel = ({ title, values, links: linksProp, onIconCha
             <div className="company-information-page__quick-links-icon-edit">
               <label className="company-information-page__quick-links-icon-label">Icon</label>
               <IconStringField
-                value={item.icon}
+                value={item.icon ?? ""}
                 onChange={(icon) => onIconChange(item.id, icon)}
               />
             </div>
