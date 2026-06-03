@@ -9,45 +9,6 @@ import { Tooltip } from "antd";
 import React from "react";
 import "./style.scss";
 
-// ─── Logo ─────────────────────────────────────────────────────────────────────
-
-const SidebarLogo = ({ collapsed }: { collapsed: boolean }) => (
-  <div className="app-sidebar__logo">
-    <a className="sidebar-logo" href="/">
-      <div className="sidebar-logo__icon">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path
-            d="M2 16l3-8h14l3 8H2z"
-            fill="currentColor"
-            opacity="0.9"
-          />
-          <rect x="5" y="16" width="4" height="4" rx="2" fill="currentColor" opacity="0.75" />
-          <rect x="15" y="16" width="4" height="4" rx="2" fill="currentColor" opacity="0.75" />
-          <path
-            d="M9 11l1.5-4h3L15 11"
-            stroke="white"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.5"
-          />
-        </svg>
-      </div>
-
-      {!collapsed && (
-        <div className="sidebar-logo__content">
-          <span className="sidebar-logo__name">LogiCMS</span>
-          <span className="sidebar-logo__sub">Logistics Platform</span>
-        </div>
-      )}
-
-      {!collapsed && <span className="sidebar-logo__badge">v2.5</span>}
-    </a>
-  </div>
-);
-
-// ─── Menu Item ────────────────────────────────────────────────────────────────
-
 const MenuItem = ({ item, isActive, collapsed, onClick }: MenuItemProps) => {
   const content = (
     <div

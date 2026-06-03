@@ -160,7 +160,12 @@ export const CompanyInformationPage = () => {
   );
 
   const syncedOtherOptions = useMemo(
-    () => syncOtherOptions(content),
+    () =>
+      syncOtherOptions({
+        intro: content.intro,
+        sections: content.sections,
+        otherOptions: content.otherOptions,
+      }),
     [content.intro, content.sections, content.otherOptions],
   );
 
