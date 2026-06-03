@@ -3,10 +3,17 @@ import type {
   AboutPagePayloadDto,
   AboutResponseDto,
 } from "../dtos/about.response";
+import type {
+  ServiceChildDto,
+  ServicePageWritePayloadDto,
+  ServiceResponseDto,
+} from "../dtos/service.response";
 import {
   COMMON_ENDPOINT,
   CONTENT_ENDPOINTS,
 } from "../endpoints/common.endpoint";
+
+export type PageWritePayloadDto = AboutPagePayloadDto | ServicePageWritePayloadDto;
 
 /** Wrapper cho ApiResponse<T> của Spring Boot */
 interface ApiResponse<T> {
@@ -31,21 +38,38 @@ export const getAboutContent = async (): Promise<AboutResponseDto> => {
   return res.data.data;
 };
 
-/** Tạo page mới (kèm sections nếu có trong payload) */
-export const createPage = async (payload: AboutPagePayloadDto) => {
-  const res = await axiosClient.post<ApiResponse<AboutResponseDto>>(
-    "/api/v1/pages",
-    payload,
+/** Lấy nội dung trang Dịch vụ (hub) — cùng contract với fe-logistics. */
+export const getServiceContent = async (): Promise<ServiceResponseDto> => {
+  const res = await axiosClient.get<ApiResponse<ServiceResponseDto>>(
+    COMMON_ENDPOINT,
+    {
+      params: {
+        url: CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT,
+      },
+    },
   );
   return res.data.data;
 };
 
+/** Lấy trang dịch vụ con theo id (chi tiết). */
+export const getServiceById = async (id: number): Promise<ServiceChildDto> => {
+  const endpoint = CONTENT_ENDPOINTS.GET_SERVICE_BY_ID.replace("{id}", String(id));
+  const res = await axiosClient.get<ApiResponse<ServiceChildDto>>(endpoint);
+  return res.data.data;
+};
+
+/** Tạo page mới (kèm sections nếu có trong payload) */
+export const createPage = async <T = AboutResponseDto>(payload: PageWritePayloadDto) => {
+  const res = await axiosClient.post<ApiResponse<T>>("/api/v1/pages", payload);
+  return res.data.data;
+};
+
 /** Cập nhật page theo id */
-export const updatePage = async (id: number, payload: AboutPagePayloadDto) => {
-  const res = await axiosClient.put<ApiResponse<AboutResponseDto>>(
-    `/api/v1/pages/${id}`,
-    payload,
-  );
+export const updatePage = async <T = AboutResponseDto>(
+  id: number,
+  payload: PageWritePayloadDto,
+) => {
+  const res = await axiosClient.put<ApiResponse<T>>(`/api/v1/pages/${id}`, payload);
   return res.data.data;
 };
 

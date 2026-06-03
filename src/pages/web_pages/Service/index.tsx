@@ -1,17 +1,28 @@
 import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Space, message } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Form, Input, Space } from "antd";
+import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getServiceContent } from "@/api/config/common.config";
+import { CONTENT_ENDPOINTS } from "@/api/endpoints/common.endpoint";
+import {
+  DEFAULT_MESSAGE,
+  NOTI_ERROR,
+  NOTI_SUCCESS,
+} from "@/common/constants/constants";
+import { EMPTY_SERVICE_HUB_CONTENT } from "./emptyServiceHubContent";
+import { mapResponseToServiceHub } from "@/common/utils/mapFromServiceResponse";
+import { saveServiceHubToApi } from "@/common/utils/saveServiceHub";
 import { normalizeSeoUrl } from "@/common/utils/seoUrl";
+import { useLoading } from "@/providers/loadingProvider";
+import { useNotification } from "@/providers/notificationProvider";
 import { ROUTER_PATH } from "@/routers/Route";
 import { SeoSection } from "../CompanyInfomation/components/SeoSection";
 import { ImageUploadField } from "../CompanyInfomation/components/ImageUploadField";
 import { ServiceHubClientPreview } from "./components/ServiceHubClientPreview";
 import { ServiceItemCardModal, type ServiceItemModalMode } from "./components/ServiceItemsEditor";
 import { ServiceListPanel } from "./components/ServiceListPanel";
-import { SERVICE_HUB_DEFAULTS } from "@/common/constants/service";
-import { migrateServiceHub } from "@/common/contexts/serviceMigrate";
-import { loadServiceHub, saveServiceHub } from "./storage";
 import type { ServiceHubContent, ServiceListItem } from "@/common/types/service";
 import "../CompanyInfomation/style.scss";
 import "./style.scss";
@@ -20,19 +31,79 @@ const { TextArea } = Input;
 
 type ViewMode = "cms" | "client";
 
+type SaveServiceHubVariables = {
+  content: ServiceHubContent;
+  pageId: number | null;
+};
+
 export const ServiceListPage = () => {
   const navigate = useNavigate();
-  const [content, setContent] = useState<ServiceHubContent>(SERVICE_HUB_DEFAULTS);
-  const [isSaving, setIsSaving] = useState(false);
+  const { setLoading } = useLoading();
+  const { showNotification } = useNotification();
+  const [content, setContent] = useState<ServiceHubContent>(EMPTY_SERVICE_HUB_CONTENT);
+  const [pageId, setPageId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("cms");
   const [cardModalOpen, setCardModalOpen] = useState(false);
   const [cardModalMode, setCardModalMode] = useState<ServiceItemModalMode>("create");
   const [editingItem, setEditingItem] = useState<ServiceListItem | null>(null);
-  const [messageApi, contextHolder] = message.useMessage();
+
+  const { data: servicePage, isLoading } = useQuery({
+    queryKey: [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
+    queryFn: () => getServiceContent(),
+    throwOnError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+      return false;
+    },
+  });
 
   useEffect(() => {
-    setContent(loadServiceHub());
-  }, []);
+    if (!servicePage) {
+      return;
+    }
+    setContent(mapResponseToServiceHub(servicePage));
+    setPageId(servicePage.id);
+  }, [servicePage]);
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
+
+  const saveMutation = useMutation({
+    mutationFn: ({ content: draft, pageId: currentPageId }: SaveServiceHubVariables) =>
+      saveServiceHubToApi(draft, currentPageId),
+    onSuccess: ({ content: saved, pageId: nextPageId }, variables) => {
+      setPageId(nextPageId);
+      setContent(saved);
+      const wasUpdate = variables.pageId != null;
+      showNotification(
+        wasUpdate
+          ? `Đã cập nhật hub dịch vụ! Page ID: ${nextPageId}`
+          : `Đã tạo hub dịch vụ! Page ID: ${nextPageId}`,
+        NOTI_SUCCESS,
+      );
+    },
+    onError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+    },
+  });
 
   const normalizedSeoUrl = useMemo(
     () => normalizeSeoUrl(content.seoUrl),
@@ -51,20 +122,11 @@ export const ServiceListPage = () => {
     [content, normalizedSeoUrl],
   );
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      const payload = migrateServiceHub({
-        ...content,
-        seoUrl: normalizeSeoUrl(content.seoUrl),
-      });
-      saveServiceHub(payload);
-      setContent(payload);
-      messageApi.success("Đã lưu danh sách và cấu hình hub.");
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSave = () => {
+    saveMutation.mutate({ content, pageId });
   };
+
+  const isSaving = saveMutation.isPending;
 
   const goToDetail = (item: ServiceListItem) => {
     navigate(`${ROUTER_PATH.SERVICE}/${encodeURIComponent(item.id)}`);
@@ -158,7 +220,6 @@ export const ServiceListPage = () => {
   if (viewMode === "client") {
     return (
       <div className="company-information-page company-information-page--client-view">
-        {contextHolder}
         <ServiceHubClientPreview content={contentForPreview} />
         <div className="company-information-page__bottom-actions">
           <Button icon={<ArrowLeftOutlined />} onClick={() => setViewMode("cms")}>
@@ -179,7 +240,6 @@ export const ServiceListPage = () => {
 
   return (
     <div className="company-information-page">
-      {contextHolder}
       <div className="company-information-page__header">
         <div className="company-information-page__header-text">
           <h1 className="company-information-page__title">Danh sách dịch vụ</h1>
