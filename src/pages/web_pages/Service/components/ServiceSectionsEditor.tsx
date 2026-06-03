@@ -1,16 +1,51 @@
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Modal, Space, Switch } from "antd";
+import { Button, Form, Input, Modal, Select, Space, Switch } from "antd";
 import { useState, type ReactNode } from "react";
 import { SectionCardHeader } from "../../CompanyInfomation/components/SectionCardHeader";
 import type { ServiceDetailSection, ServiceSectionDescription } from "@/common/types/service";
+import type { AboutContentDescriptionType } from "@/common/utils/companyInformationSection";
+import {
+  ABOUT_CONTENT_DESCRIPTION_TYPES,
+  DEFAULT_DESCRIPTION_TYPE,
+} from "@/common/utils/companyInformationSection";
+import {
+  isServiceDescriptionBold,
+  serviceDescriptionHeadersForBold,
+} from "@/common/utils/serviceDescriptionHeaders";
+
+const newId = (prefix: string) =>
+  `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+
+const DESCRIPTION_TYPE_OPTIONS = [
+  { value: "text", label: "Text" },
+  { value: "text-bullet", label: "Text bullet" },
+] as const;
+
+const emptyDescription = (): ServiceSectionDescription => ({
+  id: newId("desc"),
+  text: "",
+  type: DEFAULT_DESCRIPTION_TYPE,
+  headers: null,
+});
+
+type BoldHeaderSwitchProps = {
+  value?: string[] | null;
+  onChange?: (value: string[] | null) => void;
+};
+
+const BoldHeaderSwitch = ({ value, onChange }: BoldHeaderSwitchProps) => (
+  <Switch
+    checked={isServiceDescriptionBold(value)}
+    checkedChildren="Đậm"
+    unCheckedChildren="Thường"
+    onChange={(checked) => onChange?.(serviceDescriptionHeadersForBold(checked))}
+  />
+);
 
 type ServiceSectionsEditorProps = {
   values: ServiceDetailSection[];
   onChange: (nextValues: ServiceDetailSection[]) => void;
 };
-
-const newId = (prefix: string) =>
-  `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 
 export const ServiceSectionsEditor = ({
   values,
@@ -28,7 +63,7 @@ export const ServiceSectionsEditor = ({
       title: "",
       sortIndex: values.length + 1,
       active: true,
-      descriptions: [{ id: newId("desc"), text: "<p></p>" }],
+      descriptions: [emptyDescription()],
     });
     setSectionModalOpen(true);
   };
@@ -46,9 +81,11 @@ export const ServiceSectionsEditor = ({
       title: fields.title.trim(),
       sortIndex: fields.sortIndex,
       active: fields.active ?? true,
-      descriptions: (fields.descriptions ?? []).map((desc, index) => ({
+      descriptions: (fields.descriptions ?? []).map((desc) => ({
         id: desc.id?.trim() || newId("desc"),
         text: desc.text ?? "",
+        type: desc.type?.trim() || DEFAULT_DESCRIPTION_TYPE,
+        headers: desc.headers?.length ? desc.headers : null,
       })),
     };
 
@@ -71,6 +108,11 @@ export const ServiceSectionsEditor = ({
     onChange(next);
   };
 
+  const resolveDescriptionType = (type?: string): AboutContentDescriptionType =>
+    ABOUT_CONTENT_DESCRIPTION_TYPES.includes(type as AboutContentDescriptionType)
+      ? (type as AboutContentDescriptionType)
+      : DEFAULT_DESCRIPTION_TYPE;
+
   const handleRemoveSection = (index: number) => {
     onChange(values.filter((_, idx) => idx !== index));
   };
@@ -78,7 +120,7 @@ export const ServiceSectionsEditor = ({
   return (
     <section className="company-information-page__section-card">
       <SectionCardHeader
-        title="Các khối nội dung (sections)"
+        title="Các khối nội dung "
         onAddClick={openCreateSection}
         addTooltip="Thêm section"
       />
@@ -119,20 +161,41 @@ export const ServiceSectionsEditor = ({
                 {section.descriptions.map((desc, descIndex) => (
                   <Form.Item
                     key={desc.id}
-                    label={`Đoạn HTML ${descIndex + 1}`}
+                    label={`Nội dung ${descIndex + 1}`}
                     className="company-information-page__content-field"
                   >
                     <div className="company-information-page__content-rows">
                       <div className="company-information-page__content-row">
-                        <Input.TextArea
+                        <Select
+                          className="company-information-page__content-type-select"
+                          value={resolveDescriptionType(desc.type)}
+                          options={[...DESCRIPTION_TYPE_OPTIONS]}
+                          onChange={(type) => {
+                            const nextDescriptions = [...section.descriptions];
+                            nextDescriptions[descIndex] = {
+                              ...desc,
+                              type: type as AboutContentDescriptionType,
+                            };
+                            updateDescriptions(sectionIndex, nextDescriptions);
+                          }}
+                        />
+                        <Input
                           value={desc.text}
-                          rows={4}
+                          placeholder={`Dòng ${descIndex + 1}`}
                           onChange={(event) => {
                             const nextDescriptions = [...section.descriptions];
                             nextDescriptions[descIndex] = {
                               ...desc,
                               text: event.target.value,
                             };
+                            updateDescriptions(sectionIndex, nextDescriptions);
+                          }}
+                        />
+                        <BoldHeaderSwitch
+                          value={desc.headers}
+                          onChange={(headers) => {
+                            const nextDescriptions = [...section.descriptions];
+                            nextDescriptions[descIndex] = { ...desc, headers };
                             updateDescriptions(sectionIndex, nextDescriptions);
                           }}
                         />
@@ -159,11 +222,11 @@ export const ServiceSectionsEditor = ({
                   onClick={() => {
                     updateDescriptions(sectionIndex, [
                       ...section.descriptions,
-                      { id: newId("desc"), text: "<p></p>" },
+                      emptyDescription(),
                     ]);
                   }}
                 >
-                  Thêm đoạn HTML
+                  Thêm dòng nội dung
                 </Button>
               </Space>
             </div>
@@ -205,7 +268,7 @@ export const ServiceSectionsEditor = ({
                   <Space
                     key={field.key}
                     align="start"
-                    style={{ display: "flex", marginBottom: 8 }}
+                    style={{ display: "flex", marginBottom: 8, width: "100%" }}
                   >
                     <Form.Item
                       {...field}
@@ -216,11 +279,28 @@ export const ServiceSectionsEditor = ({
                     </Form.Item>
                     <Form.Item
                       {...field}
+                      name={[field.name, "type"]}
+                      label="Loại"
+                      initialValue={DEFAULT_DESCRIPTION_TYPE}
+                      style={{ marginBottom: 0, width: 140 }}
+                    >
+                      <Select options={[...DESCRIPTION_TYPE_OPTIONS]} />
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
                       name={[field.name, "text"]}
-                      label="HTML"
+                      label="Nội dung"
                       style={{ flex: 1, marginBottom: 0 }}
                     >
-                      <Input.TextArea rows={3} placeholder="<p>...</p>" />
+                      <Input placeholder="Nhập nội dung" />
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      name={[field.name, "headers"]}
+                      label="In đậm"
+                      style={{ marginBottom: 0 }}
+                    >
+                      <BoldHeaderSwitch />
                     </Form.Item>
                     <Button
                       danger
@@ -232,7 +312,7 @@ export const ServiceSectionsEditor = ({
                 ))}
                 <Button
                   type="dashed"
-                  onClick={() => add({ id: newId("desc"), text: "<p></p>" })}
+                  onClick={() => add(emptyDescription())}
                   block
                   icon={<PlusOutlined />}
                 >

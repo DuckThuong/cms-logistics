@@ -1,7 +1,10 @@
-/** Một dòng mô tả HTML trong section chi tiết (khớp FE: description[].text) */
+/** Một dòng mô tả HTML trong section chi tiết (khớp FE: description[].text / type) */
 export interface ServiceSectionDescription {
   id: string;
   text: string;
+  type?: string;
+  /** `["1"]` khi bật in đậm — FE đọc qua headers */
+  headers?: string[] | null;
 }
 
 /** Section nội dung trang chi tiết dịch vụ (khớp FE: sections[]) */

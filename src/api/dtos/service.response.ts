@@ -40,6 +40,7 @@ export interface ServiceOptionsDto {
 export interface ServiceDescriptionDto {
   icon: string;
   text: string;
+  type?: string;
 }
 
 export interface ServiceFeaturedDto {

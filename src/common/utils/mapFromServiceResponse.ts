@@ -11,6 +11,7 @@ import type {
   ServiceHubContent,
   ServiceListItem,
 } from "@/common/types/service";
+import { DEFAULT_DESCRIPTION_TYPE } from "@/common/utils/companyInformationSection";
 import { parseSectionTitle } from "@/common/utils/sectionTitle";
 
 const parseAppBanner = (options: ServiceOptionsDto[] | undefined) => {
@@ -66,6 +67,8 @@ export const mapResponseToServiceDetail = (
     descriptions: (section.description ?? []).map((desc, descIndex) => ({
       id: `desc-${section.id ?? index}-${descIndex}`,
       text: desc.text ?? "",
+      type: desc.type ?? DEFAULT_DESCRIPTION_TYPE,
+      headers: desc.headers?.length ? desc.headers : null,
     })),
   }));
 

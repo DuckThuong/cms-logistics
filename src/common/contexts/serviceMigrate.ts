@@ -1,3 +1,4 @@
+import { DEFAULT_DESCRIPTION_TYPE } from "@/common/utils/companyInformationSection";
 import { slugify } from "@/common/utils/seoUrl";
 import type {
   ServiceDetailContent,
@@ -16,6 +17,8 @@ const ensureDescriptions = (
   (descriptions ?? []).map((item, index) => ({
     id: item.id?.trim() || newId("desc"),
     text: item.text ?? "",
+    type: item.type?.trim() || DEFAULT_DESCRIPTION_TYPE,
+    headers: item.headers?.length ? item.headers : null,
   }));
 
 const ensureSections = (

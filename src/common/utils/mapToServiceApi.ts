@@ -14,20 +14,24 @@ import type {
   ServiceListItem,
 } from "@/common/types/service";
 import { mapChildDtoToListItem } from "@/common/utils/mapFromServiceResponse";
+import { DEFAULT_DESCRIPTION_TYPE } from "@/common/utils/companyInformationSection";
 import { buildSectionTitle } from "@/common/utils/sectionTitle";
+import type { ServiceSectionDescription } from "@/common/types/service";
 
-const mapDescriptionToApi = (text: string): ServiceSectionDescriptionDto => ({
-  type: "text",
+const mapDescriptionToApi = (
+  desc: ServiceSectionDescription,
+): ServiceSectionDescriptionDto => ({
+  type: desc.type?.trim() || DEFAULT_DESCRIPTION_TYPE,
   icon: "",
-  text: text ?? "",
+  text: desc.text ?? "",
   boldParts: [],
-  headers: null,
+  headers: desc.headers?.length ? desc.headers : null,
   cellRows: null,
 });
 
 const mapSectionToApi = (section: ServiceDetailSection): Omit<ServiceDetailSectionDto, "id" | "pageId" | "pageTitle" | "createdAt" | "updatedAt"> => ({
   title: section.title ? buildSectionTitle(section.title) : "",
-  description: (section.descriptions ?? []).map((d) => mapDescriptionToApi(d.text)),
+  description: (section.descriptions ?? []).map(mapDescriptionToApi),
   images: [],
   sortIndex: section.sortIndex,
   active: section.active ?? true,
