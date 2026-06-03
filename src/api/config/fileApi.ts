@@ -1,4 +1,4 @@
-import uploadAxiosClient from "./uploadAxiosClient";
+import uploadAxiosClient from "../uploadAxiosClient";
 
 interface ApiResponse<T> {
   success: boolean;

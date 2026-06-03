@@ -1,11 +1,22 @@
 import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Space, message } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Form, Input, Space } from "antd";
+import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
-import { anchorFromTitle } from "@/common/utils/anchor";
-import { normalizeSeoUrl } from "@/common/utils/seoUrl";
-import { COMPANY_INFORMATION_DEFAULTS } from "@/common/constants/companyInformation";
-import { migrateCompanyInformationContent } from "@/common/contexts/companyInformationMigrate";
+import {
+  createPage,
+  getAboutContent,
+  updatePage,
+} from "@/api/config/common.config";
+import { CONTENT_ENDPOINTS } from "@/api/endpoints/common.endpoint";
+import {
+  DEFAULT_MESSAGE,
+  NOTI_ERROR,
+  NOTI_SUCCESS,
+} from "@/common/constants/constants";
 import { normalizeCompanyInformationContent } from "@/common/contexts/companyInformationNormalize";
+import type { CompanyInformationContent } from "@/common/types/companyInformation";
+import { anchorFromTitle } from "@/common/utils/anchor";
 import {
   getHighlightOptions,
   getQuickLinkOptions,
@@ -20,6 +31,11 @@ import {
   replaceSectionsByKind,
   upsertClosingSection,
 } from "@/common/utils/companyInformationSection";
+import { mapResponseToCompanyInformation } from "@/common/utils/mapFromApiResponse";
+import { mapCompanyInformationToAboutApi } from "@/common/utils/mapToAboutApi";
+import { normalizeSeoUrl } from "@/common/utils/seoUrl";
+import { useLoading } from "@/providers/loadingProvider";
+import { useNotification } from "@/providers/notificationProvider";
 import { CompanyInformationClientPreview } from "./components/CompanyInformationClientPreview";
 import { ExtraFieldsEditor } from "./components/ExtraFieldsEditor";
 import { HighlightListEditor } from "./components/HighlightListEditor";
@@ -28,59 +44,94 @@ import { QuickLinksAutoPanel } from "./components/QuickLinksAutoPanel";
 import { ServicesRefusalsEditor } from "./components/ServicesRefusalsEditor";
 import { SectionsEditor } from "./components/SectionsEditor";
 import { SeoSection } from "./components/SeoSection";
-import { createPage, updatePage, getPageByUrl } from "@/api/pagesApi";
-import { mapCompanyInformationToAboutApi } from "@/common/utils/mapToAboutApi";
-import { mapResponseToCompanyInformation } from "@/common/utils/mapFromApiResponse";
-import type { CompanyInformationContent } from "@/common/types/companyInformation";
+import { EMPTY_COMPANY_INFORMATION_CONTENT } from "./emptyCompanyInformationContent";
 import "./style.scss";
 
 const { TextArea } = Input;
 
 type ViewMode = "cms" | "client";
 
+type SaveCompanyInformationVariables = {
+  content: CompanyInformationContent;
+  pageId: number | null;
+};
+
 export const CompanyInformationPage = () => {
+  const { setLoading } = useLoading();
+  const { showNotification } = useNotification();
   const [content, setContent] = useState<CompanyInformationContent>(
-    COMPANY_INFORMATION_DEFAULTS,
+    EMPTY_COMPANY_INFORMATION_CONTENT,
   );
   const [pageId, setPageId] = useState<number | null>(null);
-  const [isLoadingPage, setIsLoadingPage] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("cms");
-  const [messageApi, contextHolder] = message.useMessage();
 
-  // Load page data từ API (ưu tiên) hoặc localStorage (fallback)
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadPage = async () => {
-      try {
-        const response = await getPageByUrl("/about");
-        if (cancelled) return;
-        const mapped = mapResponseToCompanyInformation(response);
-        setContent(mapped);
-        setPageId(response.id);
-        localStorage.setItem("cms.company-information.about", JSON.stringify(mapped));
-      } catch {
-        // API chưa có page → fallback localStorage
-        if (cancelled) return;
-        const savedData = localStorage.getItem("cms.company-information.about");
-        if (savedData) {
-          try {
-            const parsedData = JSON.parse(savedData) as CompanyInformationContent;
-            setContent(migrateCompanyInformationContent(parsedData as any));
-          } catch {
-            messageApi.warning("Không thể đọc dữ liệu đã lưu trước đó.");
-          }
+  const { data: aboutPage, isLoading } = useQuery({
+    queryKey: [CONTENT_ENDPOINTS.GET_ABOUT_CONTENT],
+    queryFn: () => getAboutContent(),
+    throwOnError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
         }
-      } finally {
-        if (!cancelled) setIsLoadingPage(false);
       }
-    };
+      showNotification(message, NOTI_ERROR);
+      return false;
+    },
+  });
 
-    loadPage();
-    return () => { cancelled = true; };
-  }, [messageApi]);
+  useEffect(() => {
+    if (!aboutPage) {
+      return;
+    }
+    setContent(mapResponseToCompanyInformation(aboutPage));
+    setPageId(aboutPage.id);
+  }, [aboutPage]);
 
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
+
+  const saveMutation = useMutation({
+    mutationFn: async ({
+      content: draft,
+      pageId: currentPageId,
+    }: SaveCompanyInformationVariables) => {
+      const normalized = normalizeCompanyInformationContent(draft);
+      const payload = mapCompanyInformationToAboutApi(normalized);
+      const result =
+        currentPageId != null
+          ? await updatePage(currentPageId, payload)
+          : await createPage(payload);
+      return { result, normalized };
+    },
+    onSuccess: ({ result, normalized }, variables) => {
+      setPageId(result.id);
+      setContent(normalized);
+      const wasUpdate = variables.pageId != null;
+      showNotification(
+        wasUpdate
+          ? `Đã cập nhật thành công! Page ID: ${result.id}`
+          : `Đã tạo mới thành công! Page ID: ${result.id}`,
+        NOTI_SUCCESS,
+      );
+    },
+    onError: (error) => {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+    },
+  });
   const normalizedSeoUrl = useMemo(
     () => normalizeSeoUrl(content.seoUrl),
     [content.seoUrl],
@@ -165,39 +216,14 @@ export const CompanyInformationPage = () => {
     );
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      const normalized = normalizeCompanyInformationContent(content);
-      const payload = mapCompanyInformationToAboutApi(normalized);
-
-      let result;
-      if (pageId) {
-        // Đã có page → update
-        result = await updatePage(pageId, payload);
-        messageApi.success(`Đã cập nhật thành công! Page ID: ${result.id}`);
-      } else {
-        // Chưa có page → tạo mới
-        result = await createPage(payload);
-        setPageId(result.id);
-        messageApi.success(`Đã tạo mới thành công! Page ID: ${result.id}`);
-      }
-
-      // Lưu localStorage như backup
-      localStorage.setItem("cms.company-information.about", JSON.stringify(normalized));
-      setContent(normalized);
-    } catch (error: any) {
-      console.error("Save failed:", error);
-      messageApi.error(error?.response?.data?.message || "Lưu thất bại. Vui lòng thử lại.");
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSave = () => {
+    saveMutation.mutate({ content, pageId });
   };
 
+  const isSaving = saveMutation.isPending;
   if (viewMode === "client") {
     return (
       <div className="company-information-page company-information-page--client-view">
-        {contextHolder}
         <CompanyInformationClientPreview content={contentForPreview} />
         <div className="company-information-page__bottom-actions">
           <Button
@@ -221,7 +247,6 @@ export const CompanyInformationPage = () => {
 
   return (
     <div className="company-information-page">
-      {contextHolder}
       <div className="company-information-page__header">
         <div className="company-information-page__header-text">
           <h1 className="company-information-page__title">
@@ -328,7 +353,6 @@ export const CompanyInformationPage = () => {
         </section>
 
         <HighlightListEditor
-          title="Điểm nổi bật (Highlights)"
           values={highlightOptions}
           onChange={handleHighlightChange}
         />

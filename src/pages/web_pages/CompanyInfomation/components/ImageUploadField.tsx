@@ -1,7 +1,7 @@
 import { InboxOutlined } from "@ant-design/icons";
 import { Image, Upload, message } from "antd";
 import type { UploadRequestOption } from "rc-upload/lib/interface";
-import { uploadFile } from "@/api/fileApi";
+import { uploadFile } from "@/api/config/fileApi";
 
 type ImageUploadFieldProps = {
   value?: string;
