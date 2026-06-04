@@ -1,10 +1,11 @@
 import {
+  DeleteOutlined,
   EditOutlined,
   FileTextOutlined,
   PlusOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { Button, Collapse, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Collapse, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
 import type { ReactNode } from "react";
 import type { NewsListItem } from "@/common/types/news";
 
@@ -12,6 +13,8 @@ type NewsListPanelProps = {
   items: NewsListItem[];
   onEditDetail: (item: NewsListItem) => void;
   onEditCard: (item: NewsListItem) => void;
+  onDelete: (item: NewsListItem) => void;
+  deletingId?: string | null;
   onAdd: () => void;
   hubConfigPanel: ReactNode;
 };
@@ -20,6 +23,8 @@ export const NewsListPanel = ({
   items,
   onEditDetail,
   onEditCard,
+  onDelete,
+  deletingId = null,
   onAdd,
   hubConfigPanel,
 }: NewsListPanelProps) => {
@@ -104,7 +109,7 @@ export const NewsListPanel = ({
             {
               title: "Thao tác",
               key: "actions",
-              width: 88,
+              width: 120,
               align: "center",
               render: (_, record) => (
                 <div className="news-list-panel__actions">
@@ -125,6 +130,24 @@ export const NewsListPanel = ({
                       onClick={() => onEditCard(record)}
                     />
                   </Tooltip>
+                  <Popconfirm
+                    title="Xóa bài viết này?"
+                    description="Page sẽ bị xóa vĩnh viễn trên hệ thống."
+                    okText="Xóa"
+                    cancelText="Hủy"
+                    okButtonProps={{ danger: true }}
+                    onConfirm={() => onDelete(record)}
+                  >
+                    <Tooltip title="Xóa">
+                      <Button
+                        danger
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        loading={deletingId === record.id}
+                        aria-label="Xóa"
+                      />
+                    </Tooltip>
+                  </Popconfirm>
                 </div>
               ),
             },

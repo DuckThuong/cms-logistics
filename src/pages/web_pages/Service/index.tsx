@@ -4,7 +4,7 @@ import { Button, Form, Input, Space } from "antd";
 import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createPage, getServiceContent } from "@/api/config/common.config";
+import { createPage, deletePage, getServiceContent } from "@/api/config/common.config";
 import type {
   ServiceChildDto,
   ServiceFeaturedDto,
@@ -58,6 +58,7 @@ export const ServiceListPage = () => {
   const [cardModalMode, setCardModalMode] = useState<ServiceItemModalMode>("create");
   const [editingItem, setEditingItem] = useState<ServiceListItem | null>(null);
   const [cardSaving, setCardSaving] = useState(false);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
   const { data: servicePage, isLoading } = useQuery({
     queryKey: [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
@@ -235,6 +236,61 @@ export const ServiceListPage = () => {
     return newHubPageId;
   };
 
+  const removeChildFromList = (itemId: string) => {
+    setContent((prev) => ({
+      ...prev,
+      children: prev.children.filter((child) => child.id !== itemId),
+    }));
+  };
+
+  const removeChildFromQueryCache = (numericId: number) => {
+    queryClient.setQueryData<ServiceResponseDto>(
+      [CONTENT_ENDPOINTS.GET_SERIVICE_CONTENT],
+      (old) => {
+        if (!old) {
+          return old;
+        }
+        return {
+          ...old,
+          children: (old.children ?? []).filter((child) => child.id !== numericId),
+        };
+      },
+    );
+  };
+
+  const handleDeleteItem = async (item: ServiceListItem) => {
+    const numericId = parseNumericId(item.id);
+    setDeletingItemId(item.id);
+    try {
+      if (numericId > 0) {
+        await deletePage(numericId);
+      }
+      removeChildFromList(item.id);
+      if (numericId > 0) {
+        removeChildFromQueryCache(numericId);
+      }
+      showNotification(
+        numericId > 0
+          ? `Đã xóa dịch vụ (ID: ${numericId}).`
+          : "Đã xóa mục chưa lưu trên server.",
+        NOTI_SUCCESS,
+      );
+    } catch (error) {
+      let message = DEFAULT_MESSAGE;
+      if (isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === "string") {
+          message = apiMessage;
+        } else if (Array.isArray(apiMessage) && apiMessage[0]) {
+          message = apiMessage[0];
+        }
+      }
+      showNotification(message, NOTI_ERROR);
+    } finally {
+      setDeletingItemId(null);
+    }
+  };
+
   const handleCardSave = async (item: ServiceListItem, mode: ServiceItemModalMode) => {
     if (mode === "create" && parseNumericId(item.id) <= 0) {
       setCardSaving(true);
@@ -364,6 +420,8 @@ export const ServiceListPage = () => {
         items={content.children}
         onEditDetail={goToDetail}
         onEditCard={openEditCard}
+        onDelete={handleDeleteItem}
+        deletingId={deletingItemId}
         onAdd={openCreateCard}
         hubConfigPanel={hubConfigPanel}
       />
